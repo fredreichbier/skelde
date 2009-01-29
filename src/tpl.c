@@ -762,11 +762,11 @@ TPL_API int tpl_dump(tpl_node *r, int mode, ...) {
             } else if (rc == -1) {
                 if (errno == EINTR || errno == EAGAIN) continue;
                 tpl_hook.oops("error writing to fd %d: %s\n", fd, strerror(errno));
-                tpl_free(buf);
+                tpl_hook.free(buf);
                 return -1;
             }
         } while (sz > 0);
-        tpl_free(buf);
+        tpl_hook.free(buf);
     } else if (mode & TPL_MEM) {
         addr_out = (void**)va_arg(ap, void*);
         sz_out = va_arg(ap, size_t*);
