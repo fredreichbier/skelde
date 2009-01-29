@@ -30,12 +30,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* 
  * added some changes to avoid "error: array subscript has type 'char'"
+ * made it use sk_malloc by default ...
  */
 
 static const char id[]="$Id: tpl.c 121 2007-04-27 05:53:31Z thanson $";
 
-
-#include <stdlib.h>  /* malloc */
+#include <stdlib.h>
 #include <stdarg.h>  /* va_list */
 #include <string.h>  /* memcpy, memset, strchr */
 #include <stdio.h>   /* printf (tpl_hook.oops default function) */
@@ -54,6 +54,8 @@ static const char id[]="$Id: tpl.c 121 2007-04-27 05:53:31Z thanson $";
 #endif
 
 #include "tpl.h"
+
+#include "mem.h"
 
 #define TPL_GATHER_BUFLEN 8192
 
@@ -95,9 +97,9 @@ struct tpl_alignment_detector {
 /* Hooks for customizing tpl mem alloc, error handling, etc. Set defaults. */
 tpl_hook_t tpl_hook = {
     .oops = tpl_oops,
-    .malloc = malloc,
-    .realloc = realloc,
-    .free = free,
+    .malloc = sk_malloc,
+    .realloc = sk_realloc,
+    .free = sk_free,
     .fatal = tpl_fatal,
     .gather_max = 0 /* max tpl size (bytes) for tpl_gather */
 };
@@ -760,11 +762,11 @@ TPL_API int tpl_dump(tpl_node *r, int mode, ...) {
             } else if (rc == -1) {
                 if (errno == EINTR || errno == EAGAIN) continue;
                 tpl_hook.oops("error writing to fd %d: %s\n", fd, strerror(errno));
-                free(buf);
+                tpl_free(buf);
                 return -1;
             }
         } while (sz > 0);
-        free(buf);
+        tpl_free(buf);
     } else if (mode & TPL_MEM) {
         addr_out = (void**)va_arg(ap, void*);
         sz_out = va_arg(ap, size_t*);
