@@ -28,6 +28,10 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/* 
+ * added some changes to avoid "error: array subscript has type 'char'"
+ */
+
 static const char id[]="$Id: tpl.c 121 2007-04-27 05:53:31Z thanson $";
 
 
@@ -157,9 +161,9 @@ char *calc_field_addr(tpl_node *parent, int type,char *struct_addr, int ordinal)
     prev = parent->children->prev; 
     if (type != TPL_TYPE_DOUBLE) align_sz = tpl_types[type].sz;
     else align_sz = sizeof(struct tpl_alignment_detector) > 12 ? 8 : 4; 
-    while ((((long)prev->addr + (tpl_types[prev->type].sz * prev->num) + padding) 
+    while ((((long)prev->addr + (tpl_types[(int)prev->type].sz * prev->num) + padding) 
         % align_sz) != 0) padding++;
-    return (char*)((long)prev->addr + (tpl_types[prev->type].sz * prev->num) + padding);
+    return (char*)((long)prev->addr + (tpl_types[(int)prev->type].sz * prev->num) + padding);
 }
 
 TPL_API tpl_node *tpl_map(char *fmt,...) {
@@ -240,10 +244,10 @@ TPL_API tpl_node *tpl_map(char *fmt,...) {
                 if (in_structure) {
                     n->addr = calc_field_addr(parent,n->type,struct_addr,ordinal++);
                 } else n->addr = (void*)va_arg(ap,void*);
-                n->data = tpl_hook.malloc(tpl_types[t].sz);
+                n->data = tpl_hook.malloc(tpl_types[(int)t].sz);
                 if (!n->data) tpl_hook.fatal("out of memory\n");
                 if (n->parent->type == TPL_TYPE_ARY) 
-                    ((tpl_atyp*)(n->parent->data))->sz += tpl_types[t].sz;
+                    ((tpl_atyp*)(n->parent->data))->sz += tpl_types[(int)t].sz;
                 DL_ADD(parent->children,n);
                 break;
             case '#':
@@ -634,8 +638,8 @@ static void *tpl_dump_atyp(tpl_node *n, tpl_atyp* at, void *dv) {
                 case TPL_TYPE_UINT32:
                 case TPL_TYPE_INT64:
                 case TPL_TYPE_UINT64:
-                    dv = tpl_cpv(dv,datav,tpl_types[c->type].sz * c->num);
-                    datav = (void*)((long)datav + tpl_types[c->type].sz * c->num);
+                    dv = tpl_cpv(dv,datav,tpl_types[(int)c->type].sz * c->num);
+                    datav = (void*)((long)datav + tpl_types[(int)c->type].sz * c->num);
                     break;
                 case TPL_TYPE_BIN:
                     /* dump the buffer length followed by the buffer */
@@ -688,7 +692,7 @@ static size_t tpl_ser_osz(tpl_node *n) {
             case TPL_TYPE_UINT32:
             case TPL_TYPE_INT64:
             case TPL_TYPE_UINT64:
-                sz += tpl_types[c->type].sz * c->num;
+                sz += tpl_types[(int)c->type].sz * c->num;
                 break;
             case TPL_TYPE_BIN:
                 sz += sizeof(uint32_t);  /* binary buf len */
@@ -809,7 +813,7 @@ static int tpl_dump_to_mem(tpl_node *r,void *addr,size_t sz) {
             case TPL_TYPE_UINT32:
             case TPL_TYPE_INT64:
             case TPL_TYPE_UINT64:
-                dv = tpl_cpv(dv,c->data,tpl_types[c->type].sz * c->num);
+                dv = tpl_cpv(dv,c->data,tpl_types[(int)c->type].sz * c->num);
                 break;
             case TPL_TYPE_BIN:
                 slen = (*(tpl_bin**)(c->data))->sz;
@@ -1108,7 +1112,7 @@ static void tpl_free_atyp(tpl_node *n, tpl_atyp *atyp) {
                 case TPL_TYPE_UINT32:
                 case TPL_TYPE_INT64:
                 case TPL_TYPE_UINT64:
-                    dv = (void*)((long)dv + tpl_types[c->type].sz);
+                    dv = (void*)((long)dv + tpl_types[(int)c->type].sz);
                     break;
                 case TPL_TYPE_BIN:
                     memcpy(&binp,dv,sizeof(tpl_bin*)); /* cp to aligned */
@@ -1169,9 +1173,9 @@ static int tpl_serlen(tpl_node *r, tpl_node *n, void *dv, size_t *serlen) {
                 case TPL_TYPE_INT64:
                 case TPL_TYPE_UINT64:
                     for(fidx=0; fidx < c->num; fidx++) {  /* octothorpe support */
-                        if ((long)dv + tpl_types[c->type].sz > buf_past) return -1;
-                        dv = (void*)((long)dv + tpl_types[c->type].sz);
-                        len += tpl_types[c->type].sz;
+                        if ((long)dv + tpl_types[(int)c->type].sz > buf_past) return -1;
+                        dv = (void*)((long)dv + tpl_types[(int)c->type].sz);
+                        len += tpl_types[(int)c->type].sz;
                     }
                     break;
                 case TPL_TYPE_BIN:
@@ -1285,9 +1289,9 @@ TPL_API int tpl_pack(tpl_node *r, int i) {
             case TPL_TYPE_INT64:
             case TPL_TYPE_UINT64:
                 /* no need to use fidx iteration here; we can copy multiple values in one memcpy */
-                memcpy(child->data,child->addr,tpl_types[child->type].sz * child->num);
-                if (datav) datav = tpl_cpv(datav,child->data,tpl_types[child->type].sz * child->num);
-                if (n->type == TPL_TYPE_ARY) n->ser_osz += tpl_types[child->type].sz * child->num;
+                memcpy(child->data,child->addr,tpl_types[(int)child->type].sz * child->num);
+                if (datav) datav = tpl_cpv(datav,child->data,tpl_types[(int)child->type].sz * child->num);
+                if (n->type == TPL_TYPE_ARY) n->ser_osz += tpl_types[(int)child->type].sz * child->num;
                 break;
             case TPL_TYPE_BIN:
                 /* copy the buffer to be packed */ 
@@ -1416,15 +1420,15 @@ TPL_API int tpl_unpack(tpl_node *r, int i) {
                 /* unpack elements of cross-endian octothorpic array individually */
                 if (((tpl_root_data*)(r->data))->flags & TPL_XENDIAN) {
                     for(fidx=0; fidx < c->num; fidx++) {
-                        caddr = (void*)((long)c->addr + (fidx * tpl_types[c->type].sz));
-                        memcpy(caddr,dv,tpl_types[c->type].sz);
-                        tpl_byteswap(caddr, tpl_types[c->type].sz);
-                        dv = (void*)((long)dv + tpl_types[c->type].sz);
+                        caddr = (void*)((long)c->addr + (fidx * tpl_types[(int)c->type].sz));
+                        memcpy(caddr,dv,tpl_types[(int)c->type].sz);
+                        tpl_byteswap(caddr, tpl_types[(int)c->type].sz);
+                        dv = (void*)((long)dv + tpl_types[(int)c->type].sz);
                     }
                 } else {
                     /* bulk unpack ok if not cross-endian */
-                    memcpy(c->addr, dv, tpl_types[c->type].sz * c->num);
-                    dv = (void*)((long)dv + tpl_types[c->type].sz * c->num);
+                    memcpy(c->addr, dv, tpl_types[(int)c->type].sz * c->num);
+                    dv = (void*)((long)dv + tpl_types[(int)c->type].sz * c->num);
                 }
                 break;
             case TPL_TYPE_BIN:
@@ -1491,7 +1495,7 @@ static int tpl_unpackA0(tpl_node *r) {
             case TPL_TYPE_INT64:
             case TPL_TYPE_UINT64:
                 for(fidx=0;fidx < c->num; fidx++) {
-                    dv = (void*)((long)dv + tpl_types[c->type].sz);
+                    dv = (void*)((long)dv + tpl_types[(int)c->type].sz);
                 }
                 break;
             case TPL_TYPE_BIN:
