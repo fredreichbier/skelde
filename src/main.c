@@ -20,8 +20,6 @@ int main(int argc, char** argv) {
     sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
 
     SkObject *foo = sk_number_clone(sk_vm_get_proto(vm, "Number"));
-    printf("foo is %d\n", (int)foo);
-    printf("yayproto is %d\n", (int)sk_vm_get_proto(vm, "Object"));
     sk_object_put_slot(sk_vm_get_proto(vm, "Object"), "foo", foo);
  
     SkNode *node = sk_bytecode_parse_filename("test.sk");

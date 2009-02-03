@@ -10,7 +10,6 @@ SkVM *sk_vm_new() {
     /* the lobby is actually an Object clone, too. */
     vm->lobby = sk_object_clone(uberproto);
     sk_vm_add_proto(vm, "Object", uberproto);
-    printf("Uberproto: %d\n", (int)uberproto);
     /* nil is none. */
     vm->nil = sk_object_new(vm);
     return vm;

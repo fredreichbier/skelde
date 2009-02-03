@@ -21,10 +21,7 @@ SkObject *sk_object_new(SkVM *vm) {
 
 SkObject *sk_object_clone_base(SkObject *self) {
     SkObject *other = sk_object_new(self->vm);
-    printf("CLONED ... %d %d\n", (int)self, (int)other);
-    printf("The proto is %d ...", (int)sk_object_get_slot_lazy(self, "proto"));
     sk_object_put_slot(other, "proto", self); // TODO: nicer?
-    printf("... and now %d!\n", (int)sk_object_get_slot_lazy(self, "proto"));
     if(self->init_func) {
         (self->init_func)(other);
     }
@@ -49,21 +46,17 @@ SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message) {
     // TODO: type checking
     bstring name = sk_string_get_bstring(sk_object_get_slot_lazy(message, "name"));
-    printf("searching for %s in %d\n", bstr2cstr(name, '\0'), (int)self);
     SkObject *slot;
     int ret = sk_object_get_slot_bstring(self, name, (void **)&slot);
     if(ret == MAP_OK) {
         // we are having the slot. return it.
-        printf("gotslot: %d\n", (int)slot);
         return slot; 
     } else if(ret == MAP_MISSING) {
         // no slot. search recursively in the proto.
         SkObject *proto;
-        printf("prototototo: %d\n", (int)(proto));
-        assert(sk_object_get_slot(self, "proto", (void **)&slot) == MAP_OK);
+        assert(sk_object_get_slot(self, "proto", (void **)&proto) == MAP_OK);
         if(!proto) {
             // we have no proto. return nil. we're sorry.
-            printf("nilly\n");
             return SK_NIL;
         } else {
             return sk_object_dispatch_message(proto, message);
