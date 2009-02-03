@@ -21,11 +21,12 @@ typedef struct _SkObject {
     SkCloneFunction clone_func;
 } SkObject;
 
-SkObject *sk_object_new();
+SkObject *sk_object_new(struct _SkVM *vm);
 SkObject *sk_object_clone(SkObject *self);
 SkObject *sk_object_clone_base(SkObject *self);
 SkObject *sk_object_create_proto(struct _SkVM *vm);
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
+SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)
@@ -54,8 +55,11 @@ SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
 #define SK_NIL \
     SK_VM->nil
 
+#define DECLARE_LAZY_CLONE_FUNC(NAME) \
+    SkObject *NAME(SkObject *self)
+
 #define DEFINE_LAZY_CLONE_FUNC(NAME) \
-    SkObject *NAME(SkObject *self) { \
+    DECLARE_LAZY_CLONE_FUNC(NAME) { \
         SkObject *other = sk_object_new(self->vm); \
         sk_object_put_slot(other, "proto", self); \
         if(self->init_func) { \

@@ -5,8 +5,6 @@
 #include "vm.h"
 #include "number.h"
 
-SkObject *sk_number_clone(SkObject *self);
-
 void sk_number_init(SkObject *self) {
     int *data = sk_malloc(sizeof(int));
     *data = 5;
@@ -26,5 +24,8 @@ SkObject *sk_number_create_proto(SkVM *vm) {
     return self;
 }
 
-DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?
+void sk_number_set_int(SkObject *self, int value) {
+    *(int *)self->data = value;
+}
 
+DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?

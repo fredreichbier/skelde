@@ -11,5 +11,6 @@ typedef struct _SkVM {
 
 SkVM *sk_vm_new();
 void sk_vm_add_proto(SkVM *vm, const char *name, SkObject *obj);
+SkObject *sk_vm_get_proto(SkVM *vm, const char *name);
 
 #endif

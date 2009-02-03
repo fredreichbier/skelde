@@ -1,4 +1,4 @@
-#include <string.h>
+#include <stdio.h>
 
 #include "mem.h"
 #include "object.h"
@@ -6,11 +6,20 @@
 
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
-    vm->lobby = sk_object_new();
-    vm->nil = sk_object_new();
+    SkObject *uberproto = sk_object_create_proto(vm);
+    /* the lobby is actually an Object clone, too. */
+    vm->lobby = sk_object_clone(uberproto);
+    sk_vm_add_proto(vm, "Object", uberproto);
+    printf("Uberproto: %d\n", (int)uberproto);
+    /* nil is none. */
+    vm->nil = sk_object_new(vm);
     return vm;
 }
 
 void sk_vm_add_proto(SkVM *vm, const char *name, SkObject *obj) {
     sk_object_put_slot(vm->lobby, name, obj);    
+}
+
+SkObject *sk_vm_get_proto(SkVM *vm, const char *name) {
+    return sk_object_get_slot_lazy(vm->lobby, name); 
 }

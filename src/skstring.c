@@ -2,11 +2,10 @@
 
 #include "skstring.h"
 
-SkObject *sk_string_clone(SkObject *self);
-
 void sk_string_init(SkObject *self) {
     bstring data;
     sk_object_set_data(self, data);
+    sk_object_set_clone_func(self, &sk_string_clone);
 }
 
 SkObject *sk_string_create_proto(SkVM *vm) {
@@ -19,6 +18,10 @@ SkObject *sk_string_create_proto(SkVM *vm) {
 
     sk_object_put_slot(self, "proto", object);
     return self;
+}
+
+void sk_string_set_bstring(SkObject *self, bstring string) {
+    sk_object_set_data(self, string);
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_string_clone);

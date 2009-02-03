@@ -2,8 +2,6 @@
 
 #include "message.h"
 
-SkObject *sk_message_clone(SkObject *self);
-
 /* a message has the following slots:
    * name
    * sender
