@@ -16,5 +16,11 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
     sk_object_put_slot(self, "receiver", _receiver)
 #define sk_message_set_arguments(self, _arguments) \
     sk_object_put_slot(self, "arguments", _arguments)
+#define sk_message_get_receiver(self) \
+    sk_object_get_slot_lazy(self, "receiver")
+#define sk_message_get_name(self) \
+    sk_object_get_slot_lazy(self, "name")
+#define sk_message_get_arguments(self) \
+    sk_object_get_slot_lazy(self, "arguments")
 
 #endif

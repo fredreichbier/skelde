@@ -4,6 +4,8 @@
 #include "hashmap.h"
 #include "skstring.h"
 #include "object.h"
+#include "callable.h"
+#include "message.h"
 #include "vm.h"
 #include "number.h"
 
@@ -50,7 +52,11 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message) {
     int ret = sk_object_get_slot_bstring(self, name, (void **)&slot);
     if(ret == MAP_OK) {
         // we are having the slot. return it.
-        return slot; 
+        SkObject *ret = slot;
+        if(sk_is_callable(slot)) {
+            ret = sk_callable_call(slot, message);
+        }
+        return ret;
     } else if(ret == MAP_MISSING) {
         // no slot. search recursively in the proto.
         SkObject *proto;
@@ -66,3 +72,5 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message) {
         assert(0);
     }
 }
+
+

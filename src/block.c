@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 
 #include "block.h"
 
@@ -21,6 +22,11 @@ SkObject *sk_block_create_proto(SkVM *vm) {
 
 void sk_block_set_block(SkObject *self, SkNodeBlock *block) {
     self->data = (void *)block;
+}
+
+SkObject *sk_block_call(SkObject *self, SkObject *receiver, SkObject *message) {
+    printf("calling\n");
+    return NULL;
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_block_clone); // isn't that evil?

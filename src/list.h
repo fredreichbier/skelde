@@ -12,5 +12,7 @@ SkObject *sk_list_get_at(SkObject *self, int index);
 
 #define sk_list_get_data(obj) \
     ((CVector *)sk_object_get_data(obj))
+#define sk_list_size(obj) \
+    cvector_size(sk_list_get_data(obj))
 
 #endif

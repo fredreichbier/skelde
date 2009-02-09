@@ -14,4 +14,7 @@ DECLARE_LAZY_CLONE_FUNC(sk_string_clone);
 #define sk_string_get_bstring(obj) \
     ((SkObject*)(obj))->data
 
+#define sk_string_as_charp(obj) \
+    bstr2cstr(sk_string_get_bstring(obj), '\0')
+
 #endif

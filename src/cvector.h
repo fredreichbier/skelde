@@ -132,7 +132,14 @@
     int cvector_set_size(const CVectorHandle vectorhandle, const size_t size);
 
     /* cvector_size -- macro to return the CVector size */
-    
+
 #define cvector_size(vectorhandle)  (vectorhandle)->size
+
+    void *cvector_top(const CVectorHandle vectorhandle);
+
+#define cvector_push(VEC, ITEM) \
+        cvector_add_element(VEC, ITEM)
+#define cvector_pop(VEC) \
+        cvector_remove_element(VEC, cvector_size(VEC) - 1)
 
 #endif

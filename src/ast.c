@@ -22,7 +22,7 @@ SkObject *sk_ast_evaluate_message(SkVM *vm, SkNode *node_) {
     sk_message_set_name(self, sk_ast_evaluate_string(vm, node->name));
     SkObject *receiver = sk_ast_evaluate(vm, node->receiver);
     if(receiver == vm->nil) {
-        receiver = vm->lobby;
+        receiver = sk_vm_callstack_top(vm);
     }
     sk_message_set_receiver(self, receiver);
 
