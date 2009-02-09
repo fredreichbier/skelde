@@ -42,19 +42,20 @@ SkObject *sk_callable_call(SkObject *self, SkObject *message) {
     sk_vm_callstack_push(SK_VM, ctx);
     /* evaluate ... */
     SkCallableData *data = sk_callable_get_data(self);
+    SkObject *ret = SK_NIL;
     switch(data->type) {
         case SK_CALLABLE_TYPE_BLOCK:
-            sk_block_call(data->block, receiver, message);
+            ret = sk_block_call(data->block, receiver, message);
             break;
         case SK_CALLABLE_TYPE_CFUNCTION:
-            (data->c_function)(receiver, message);
+            ret = (data->c_function)(receiver, message);
             break;
         default:
             printf("Unknown callable type: %d\n", data->type);
     }
     /* cleanup */
     sk_vm_callstack_pop(SK_VM);
-    return self; // TODO: return value
+    return ret;
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_callable_clone); // isn't that evil?

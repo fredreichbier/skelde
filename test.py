@@ -23,5 +23,5 @@ with open('test.sk', 'w') as sk:
     # write prelude
     sk.write('sk\x00\x01')
     # write number
-    sk.write(message(string("print"), string("huhu"), []))
+    sk.write(message(string("print"), message(string("print"), string("huhu"), []), []))
 
