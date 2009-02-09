@@ -9,6 +9,7 @@
  *
  */
 
+#include <stdio.h>
 
 /**********************************************************************
  *                                                                    *
@@ -388,8 +389,3 @@ int cvector_set_flags(const CVectorHandle vectorhandle, const unsigned int flags
     
 }
 
-void *cvector_top(const CVectorHandle vectorhandle) {
-    void *ptr;
-    cvector_get_elementptr(vectorhandle, &ptr, cvector_size(vectorhandle) - 1); // TODO: error checking
-    return ptr;
-}

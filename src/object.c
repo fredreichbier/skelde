@@ -3,6 +3,7 @@
 #include "mem.h"
 #include "hashmap.h"
 #include "skstring.h"
+#include "list.h"
 #include "object.h"
 #include "callable.h"
 #include "message.h"
@@ -27,7 +28,6 @@ SkObject *sk_object_clone_base(SkObject *self) {
     if(self->init_func) {
         (self->init_func)(other);
     }
-    other->init_func = self->init_func;
     return other;
 }
 
@@ -36,7 +36,11 @@ SkObject *sk_object_clone(SkObject *self) {
 }
 
 SkObject *sk_object_create_proto(SkVM *vm) {
-    return sk_object_new(vm);
+    /* set methods */
+    SkObject *self = sk_object_new(vm);
+    sk_object_set_method(self, "set_slot", &sk_object__set_slot);
+    sk_object_set_method(self, "get_slot", &sk_object__get_slot);
+    return self;
 }
 
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
@@ -73,4 +77,18 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message) {
     }
 }
 
+SkObject *sk_object__set_slot(SkObject *self, SkObject *message) {
+    SkObject *arguments = sk_message_get_arguments(message);
+    bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
+    sk_object_set_slot_bstring(self, name, sk_list_get_at(arguments, 1));
+    return self;
+}
 
+SkObject *sk_object__get_slot(SkObject *self, SkObject *message) {
+    SkObject *arguments = sk_message_get_arguments(message);
+    bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
+    
+    SkObject *slot;
+    assert(sk_object_get_slot_bstring(self, name, (void **)&slot) == MAP_OK); // uh ... make that nicer
+    return slot;
+}

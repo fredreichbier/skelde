@@ -22,18 +22,23 @@ SkObject *sk_ast_evaluate_message(SkVM *vm, SkNode *node_) {
     sk_message_set_name(self, sk_ast_evaluate_string(vm, node->name));
     SkObject *receiver = sk_ast_evaluate(vm, node->receiver);
     if(receiver == vm->nil) {
-        receiver = sk_vm_callstack_top(vm);
+        sk_message_set_receiver(self, vm->lobby);
+    } else {
+        sk_message_set_receiver(self, receiver);
     }
-    sk_message_set_receiver(self, receiver);
-
-    SkObject *args = sk_message_clone(sk_vm_get_proto(vm, "List"));
+    SkObject *args = sk_list_clone(sk_vm_get_proto(vm, "List"));
     int i;
     for(i = 0; i < node->argcount; i++) {
-        SkObject *argument = sk_ast_evaluate_message(vm, node->arguments[i]);
+        SkObject *argument = sk_ast_evaluate(vm, node->arguments[i]);
         sk_list_append(args, argument);
     }
+    sk_message_set_arguments(self, args);
 
-    return sk_object_dispatch_message(receiver, self);
+    if(receiver == vm->nil) {
+        return sk_vm_dispatch_message(vm, self);
+    } else {
+        return sk_object_dispatch_message(receiver, self);
+    }
 }
 
 SkObject *sk_ast_evaluate_string(SkVM *vm, SkNode *node) {

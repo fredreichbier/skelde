@@ -34,6 +34,7 @@ void sk_list_append(SkObject *self, SkObject *item) {
 
 SkObject *sk_list_get_at(SkObject *self, int index) {
     SkObject *item;
+    // That may be buggy. Without ampersand?
     assert(cvector_get_element(sk_object_get_data(self), &item, index) == 0);
     return item;
 }

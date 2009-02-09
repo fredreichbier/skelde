@@ -135,8 +135,6 @@
 
 #define cvector_size(vectorhandle)  (vectorhandle)->size
 
-    void *cvector_top(const CVectorHandle vectorhandle);
-
 #define cvector_push(VEC, ITEM) \
         cvector_add_element(VEC, ITEM)
 #define cvector_pop(VEC) \

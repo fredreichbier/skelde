@@ -2,6 +2,7 @@
 #define OBJECT_H_INCLUDED
 
 #include <string.h>
+#include <stdio.h>
 
 #include "hashmap.h"
 
@@ -28,6 +29,9 @@ SkObject *sk_object_create_proto(struct _SkVM *vm);
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message);
 
+SkObject *sk_object__set_slot(SkObject *self, SkObject *message);
+SkObject *sk_object__get_slot(SkObject *self, SkObject *message);
+
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)
 
@@ -41,6 +45,8 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message);
     hashmap_put((obj)->slots, hashmap_hash_string((name), strlen((name))), (value))
 
 #define sk_object_set_slot sk_object_put_slot
+#define sk_object_set_slot_bstring(obj, name, value) \
+    hashmap_put((obj)->slots, hashmap_hash_bstring(name), (value))
 
 #define sk_object_get_slot(obj, name, out) \
     hashmap_get((obj)->slots, hashmap_hash_string((name), strlen((name))), (out))
@@ -71,6 +77,7 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message);
         return other; \
     }
 
-#define sk_object_put_method(self, name, meth) \
-    sk_object_put_slot(self, name, sk_callable_from_cfunction((self)->vm, meth))
+#define sk_object_set_method(self, name, meth) \
+    sk_object_set_slot(self, name, sk_callable_from_cfunction((self)->vm, meth))
+
 #endif

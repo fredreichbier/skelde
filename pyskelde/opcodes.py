@@ -1,0 +1,5 @@
+BLOCK = 1
+NUMBER = 2
+STRING = 3
+MESSAGE = 4
+NIL = 5

@@ -17,10 +17,10 @@ SkObject *sk_callable_create_proto(SkVM *vm) {
     sk_object_set_init_func(self, &sk_callable_init);
     sk_object_set_clone_func(self, &sk_callable_clone);
 
-    SkObject *object;
-    assert(sk_object_get_slot(vm->lobby, "Object", (void **)&object) == MAP_OK);
+//    SkObject *object;
+//    assert(sk_object_get_slot(vm->lobby, "Object", (void **)&object) == MAP_OK);
 
-    sk_object_put_slot(self, "proto", object);
+//sk_object_put_slot(self, "proto", object);
     return self;
 }
 

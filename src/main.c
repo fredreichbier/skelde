@@ -2,13 +2,10 @@
 
 #include "vm.h"
 #include "ast.h"
+#include "skstring.h"
 #include "object.h"
 #include "number.h"
-#include "list.h"
 #include "callable.h"
-#include "message.h"
-#include "block.h"
-#include "skstring.h"
 #include "bytecode.h"
 
 SkObject *sk_string_print(SkObject *self, SkObject *message) {
@@ -18,23 +15,12 @@ SkObject *sk_string_print(SkObject *self, SkObject *message) {
 
 int main(int argc, char** argv) {
     SkVM *vm = sk_vm_new();
-    // The Object proto is added implictly.
-    sk_vm_add_proto(vm, "Number", sk_number_create_proto(vm));
-    sk_vm_add_proto(vm, "Block", sk_block_create_proto(vm));
-    sk_vm_add_proto(vm, "List", sk_list_create_proto(vm));
-    sk_vm_add_proto(vm, "Message", sk_message_create_proto(vm));
-    sk_vm_add_proto(vm, "Callable", sk_callable_create_proto(vm));
-    sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
+    sk_object_set_method(sk_vm_get_proto(vm, "String"), "print", &sk_string_print);
 
-    sk_object_put_method(sk_vm_get_proto(vm, "String"), "print", &sk_string_print);
-
-    SkObject *foo = sk_number_clone(sk_vm_get_proto(vm, "Number"));
-    sk_object_put_slot(sk_vm_get_proto(vm, "Object"), "foo", foo);
- 
     SkNode *node = sk_bytecode_parse_filename("test.sk");
-    SkObject *number = sk_ast_evaluate(vm, node);
-//    printf("Number: %d\n", sk_number_get_int(number));
-    printf("String: %s\n", bstr2cstr(sk_string_get_bstring(number), ' '));
+    sk_ast_evaluate(vm, node);
+    SkObject *slot = sk_object_get_slot_lazy(vm->lobby, "foo");
+    printf("should be 'bar': %s\n", bstr2cstr(sk_string_get_bstring(slot), ' '));
 
     return 0;
 }
