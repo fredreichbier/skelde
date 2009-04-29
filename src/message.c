@@ -4,7 +4,7 @@
 
 /* a message has the following slots:
    * name
-   * sender
+   * arguments
  */
 
 void sk_message_init(SkObject *self) {
@@ -24,4 +24,3 @@ SkObject *sk_message_create_proto(SkVM* vm) {
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_message_clone);
-

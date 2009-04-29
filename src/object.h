@@ -78,6 +78,6 @@ SkObject *sk_object__get_slot(SkObject *self, SkObject *message);
     }
 
 #define sk_object_set_method(self, name, meth) \
-    sk_object_set_slot(self, name, sk_callable_from_cfunction((self)->vm, meth))
+    sk_object_set_slot(self, name, name) /* TODO */
 
 #endif

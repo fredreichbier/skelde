@@ -7,22 +7,18 @@
 #include "objlist.h"
 #include "number.h"
 #include "list.h"
-#include "callable.h"
 #include "message.h"
-#include "block.h"
 #include "skstring.h"
 
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
     /* The lobby is not a real object ... ok? */
     vm->lobby = sk_object_new(vm);
-    sk_vm_add_proto(vm, "Callable", sk_callable_create_proto(vm));
     SkObject *uberproto = sk_object_create_proto(vm);
     sk_object_set_slot(vm->lobby, "proto", uberproto);
     /* make the protos */
     sk_vm_add_proto(vm, "Object", uberproto);
     sk_vm_add_proto(vm, "Number", sk_number_create_proto(vm));
-    sk_vm_add_proto(vm, "Block", sk_block_create_proto(vm));
     sk_vm_add_proto(vm, "List", sk_list_create_proto(vm));
     sk_vm_add_proto(vm, "Message", sk_message_create_proto(vm));
     sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
