@@ -33,5 +33,9 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
     sk_object_get_slot_lazy(self, "previous")
 #define sk_message_append_argument(self, ARG) \
     sk_list_append(sk_message_get_arguments(self), ARG)
+#define sk_message_arg_at(self, idx) \
+    sk_list_get_at(sk_message_get_arguments(self), idx)
+#define sk_message_eval_arg_at(self, idx) \
+    sk_message_dispatch_avalanche(sk_message_arg_at(self, idx))
 
 #endif

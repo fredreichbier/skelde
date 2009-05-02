@@ -1,6 +1,8 @@
 #include <assert.h>
 
 #include "skstring.h"
+#include "list.h"
+#include "message.h"
 
 void sk_string_init(SkObject *self) {
     bstring data;
@@ -17,6 +19,7 @@ SkObject *sk_string_create_proto(SkVM *vm) {
     
     /* methods */
     sk_object_bind_method(self, "to_string", &sk_string__to_string);
+    sk_object_bind_method(self, "+", &sk_string__concat);
 
     return self;
 }
@@ -32,7 +35,18 @@ SkObject *sk_string_from_bstring(SkVM *vm, bstring string) {
 }
 
 SkObject *sk_string__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
-    return self;
+    return self; 
+}
+
+SkObject *sk_string__concat(SkObject *slot, SkObject *self, SkObject *msg) {
+    SkObject *other = sk_message_eval_arg_at(msg, 0);
+    if(!sk_string_check(other)) {
+        printf("second operand has to be a string.\n");
+        abort();
+    }
+    bstring dup = bstrcpy(sk_string_get_bstring(self));
+    bconcat(dup, sk_string_get_bstring(other));
+    return sk_string_from_bstring(SK_VM, dup);
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_string_clone);

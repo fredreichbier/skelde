@@ -61,6 +61,11 @@ static _Bool is_number(bstring string) {
     if(!(isdigit(ch) || ch == '+' || ch == '-')) {
         return 0;
     }
+    /* if the first char is not a digit (-> '+' or '-'), but the string is only
+     * one char long, it's invalid.*/
+    if(!isdigit(ch) && string->slen == 1) {
+        return 0;
+    }
     /* check all following, have to be digits. */
     for(i = 1; i < string->slen; i++) {
         ch = bchar(string, i);

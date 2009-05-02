@@ -13,11 +13,15 @@ SkObject *sk_string_from_bstring(SkVM *vm, bstring string);
 DECLARE_LAZY_CLONE_FUNC(sk_string_clone);
 
 SkObject *sk_string__to_string(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_string__concat(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_string_get_bstring(obj) \
     ((SkObject*)(obj))->data
 
 #define sk_string_as_charp(obj) \
     bstr2cstr(sk_string_get_bstring(obj), '\0')
+
+#define sk_string_check(self) \
+    ((self)->clone_func == &sk_string_clone)
 
 #endif

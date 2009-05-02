@@ -1,2 +1,2 @@
-4 println;
-"Hello-diho!" println;
+"Halli" +("hallo") println;
+"Error" +(5) println;
