@@ -43,10 +43,15 @@ SkObject *sk_callable_create(struct _SkVM *vm, SkCallFunction func);
 void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func);
 _Bool sk_object_to_bool(SkObject *self);
 SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg);
+bstring sk_object_to_repr_simple(SkObject *self);
+bstring sk_object_to_repr(SkObject *self);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__to_bool(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)

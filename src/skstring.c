@@ -14,9 +14,9 @@ SkObject *sk_string_create_proto(SkVM *vm) {
     sk_object_set_clone_func(self, &sk_string_clone);
 
     SkObject *object;
-    assert(sk_object_get_slot(vm->lobby, "Object", (void **)&object) == MAP_OK);
-
+    sk_object_get_slot(vm->lobby, "Object", (void **)&object);
     sk_object_put_slot(self, "proto", object);
+
     return self;
 }
 

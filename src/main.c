@@ -21,7 +21,5 @@ int main(int argc, char** argv) {
     SkObject *avalanche = sk_bytecode_parse_filename(vm, "test.sk");
     SkObject *result = sk_message_dispatch_avalanche(avalanche);
 
-    printf("should be 'bar': %s\n", bstr2cstr(sk_string_get_bstring(result), '\\'));
-
     return 0;
 }
