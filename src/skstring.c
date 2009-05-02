@@ -24,4 +24,11 @@ void sk_string_set_bstring(SkObject *self, bstring string) {
     sk_object_set_data(self, string);
 }
 
+SkObject *sk_string_from_bstring(SkVM *vm, bstring string) {
+    SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "String"));
+    printf("making '%s' (%d)...\n", bstr2cstr(string, '~'), string->slen);
+    sk_string_set_bstring(self, string);
+    return self;
+}
+
 DEFINE_LAZY_CLONE_FUNC(sk_string_clone);

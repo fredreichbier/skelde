@@ -15,14 +15,11 @@ SkVM *sk_vm_new();
 void sk_vm_add_proto(SkVM *vm, const char *name, SkObject *obj);
 SkObject *sk_vm_get_proto(SkVM *vm, const char *name);
 SkObject *sk_vm_dispatch_message(SkVM *vm, SkObject *message);
-
-#define sk_vm_callstack_push(VM, CTX) \
-    cvector_push((VM)->callstack, &(CTX))
-// pass the pointer to a value, that means a pointer to a pointer to a SkObject.
+void sk_vm_callstack_push(SkVM *vm, SkObject *ctx);
 
 #define sk_vm_callstack_pop(VM) \
     cvector_pop((VM)->callstack)
 #define sk_vm_callstack_top(VM) \
-    cvector_top((VM)->callstack)
+    objlist_top((VM)->callstack)
 
 #endif

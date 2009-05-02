@@ -4,20 +4,22 @@
 #include "skstring.h"
 #include "object.h"
 #include "number.h"
+#include "message.h"
 #include "bytecode.h"
 
-SkObject *sk_string_print(SkObject *self, SkObject *message) {
-    printf("%s\n", sk_string_as_charp(self));
-    return self;
+SkObject *sk_test(SkObject *slot, SkObject *self, SkObject *msg) {
+    printf("TEST CALLED\n");
+    return self->vm->nil;
 }
 
 int main(int argc, char** argv) {
     SkVM *vm = sk_vm_new();
-    sk_object_set_method(sk_vm_get_proto(vm, "String"), "print", &sk_string_print);
+    sk_object_bind_method(vm->lobby, "test", &sk_test);
 
-    sk_bytecode_parse_filename(vm, "test.sk");
-    SkObject *slot = sk_object_get_slot_lazy(vm->lobby, "foo");
-    printf("should be 'bar': %s\n", bstr2cstr(sk_string_get_bstring(slot), ' '));
+    SkObject *avalanche = sk_bytecode_parse_filename(vm, "test.sk");
+    sk_message_dispatch_avalanche(avalanche);
+
+//    printf("should be 'bar': %s\n", bstr2cstr(sk_string_get_bstring(slot), ' '));
 
     return 0;
 }

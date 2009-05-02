@@ -12,6 +12,8 @@ struct _SkVM;
 
 typedef void (*SkInitFunction)(struct _SkObject *);
 typedef struct _SkObject *(*SkCloneFunction)(struct _SkObject *);
+typedef struct _SkObject *(*SkCallFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
+typedef struct _SkObject *(*SkDispatchFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
 
 typedef struct _SkObject {
     struct _SkVM *vm;
@@ -20,17 +22,24 @@ typedef struct _SkObject {
     /* customizable function pointers */
     SkInitFunction init_func;
     SkCloneFunction clone_func;
+    SkCallFunction call_func;
+    SkDispatchFunction dispatch_func;
 } SkObject;
 
 SkObject *sk_object_new(struct _SkVM *vm);
 SkObject *sk_object_clone(SkObject *self);
 SkObject *sk_object_clone_base(SkObject *self);
 SkObject *sk_object_create_proto(struct _SkVM *vm);
+SkObject *sk_object_call(SkObject *self, SkObject *ctx, SkObject *message);
+_Bool sk_object_get_activatable(SkObject *self);
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
-SkObject *sk_object_dispatch_message(SkObject *self, SkObject *message);
+SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg);
+SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObject *message);
+SkObject *sk_callable_create(struct _SkVM *vm, SkCallFunction func);
+void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func);
 
-SkObject *sk_object__set_slot(SkObject *self, SkObject *message);
-SkObject *sk_object__get_slot(SkObject *self, SkObject *message);
+SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *message);
+SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *message);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)
@@ -57,6 +66,12 @@ SkObject *sk_object__get_slot(SkObject *self, SkObject *message);
 #define sk_object_set_clone_func(obj, func) \
     ((SkObject *)(obj))->clone_func = (func);
 
+#define sk_object_set_dispatch_func(obj, func) \
+    ((SkObject *)(obj))->dispatch_func = (func);
+
+#define sk_object_set_call_func(obj, func) \
+    ((SkObject *)(obj))->call_func = (func);
+
 #define SK_VM \
     (((SkObject *)self)->vm)
 
@@ -70,14 +85,13 @@ SkObject *sk_object__get_slot(SkObject *self, SkObject *message);
     DECLARE_LAZY_CLONE_FUNC(NAME) { \
         SkObject *other = sk_object_new(self->vm); \
         sk_object_put_slot(other, "proto", self); \
+        sk_object_set_dispatch_func(other, self->dispatch_func); \
+        sk_object_set_call_func(other, self->call_func); \
         if(self->init_func) { \
             (self->init_func)(other); \
         } \
         other->init_func = self->init_func; \
         return other; \
     }
-
-#define sk_object_set_method(self, name, meth) \
-    sk_object_set_slot(self, name, name) /* TODO */
 
 #endif

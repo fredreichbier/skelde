@@ -9,6 +9,7 @@
 void sk_string_init(SkObject *self);
 SkObject *sk_string_create_proto(SkVM *vm);
 void sk_string_set_bstring(SkObject *self, bstring string);
+SkObject *sk_string_from_bstring(SkVM *vm, bstring string);
 DECLARE_LAZY_CLONE_FUNC(sk_string_clone);
 
 #define sk_string_get_bstring(obj) \

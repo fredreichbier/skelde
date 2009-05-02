@@ -6,10 +6,7 @@
 #include "object.h"
 #include "cvector.h"
 
-inline SkObject *objlist_get_at(CVector *vec, size_t index) {
-    SkObject *obj;
-    assert(cvector_get_element(vec, &obj, index) == 0);
-    return obj;
-}
+SkObject *objlist_get_at(CVector *vec, size_t index);
+#define objlist_top(VEC) objlist_get_at(VEC, cvector_size(VEC) - 1)
 
 #endif

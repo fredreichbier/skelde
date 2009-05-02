@@ -50,3 +50,8 @@ SkObject *sk_vm_dispatch_message(SkVM *vm, SkObject *message) {
     }
     return NULL;
 }
+
+void sk_vm_callstack_push(SkVM *vm, SkObject *ctx) {
+    // pass the pointer to a value, that means a pointer to a pointer to a SkObject.
+    cvector_push(vm->callstack, &ctx); 
+}

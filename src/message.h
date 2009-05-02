@@ -6,8 +6,11 @@
 #include "skstring.h"
 
 void sk_message_init(SkObject *self);
+void sk_message_init2(SkObject *self);
 SkObject *sk_message_clone(SkObject *self);
 SkObject *sk_message_create_proto(SkVM *vm);
+SkObject *sk_message_start_dispatch(SkObject *self);
+SkObject *sk_message_dispatch_avalanche(SkObject *self);
 DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
 
 #define sk_message_set_name(self, _name) \
@@ -18,5 +21,15 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
     sk_object_get_slot_lazy(self, "name")
 #define sk_message_get_arguments(self) \
     sk_object_get_slot_lazy(self, "arguments")
+#define sk_message_set_next(self, _next) \
+    sk_object_put_slot(self, "next", _next)
+#define sk_message_get_next(self) \
+    sk_object_get_slot_lazy(self, "next")
+#define sk_message_set_previous(self, _previous) \
+    sk_object_put_slot(self, "previous", _previous)
+#define sk_message_get_previous(self) \
+    sk_object_get_slot_lazy(self, "previous")
+#define sk_message_append_argument(self, ARG) \
+    sk_list_append(sk_message_get_arguments(self), ARG)
 
 #endif

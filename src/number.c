@@ -28,4 +28,10 @@ void sk_number_set_int(SkObject *self, int value) {
     *(int *)self->data = value;
 }
 
+SkObject *sk_number_create(SkVM *vm, int value) {
+    SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "Number"));
+    sk_number_set_int(self, value);
+    return self;
+}
+
 DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?
