@@ -41,6 +41,7 @@ SkObject *sk_object_clone(SkObject *self) {
 SkObject *sk_object_create_proto(SkVM *vm) {
     /* set methods */
     SkObject *self = sk_object_new(vm);
+    sk_object_bind_method(self, "to_bool", &sk_object__to_bool);
     sk_object_bind_method(self, "set_slot", &sk_object__set_slot);
     sk_object_bind_method(self, "get_slot", &sk_object__get_slot);
     return self;
@@ -61,6 +62,7 @@ SkObject *sk_object_call(SkObject *self, SkObject *ctx, SkObject *message) {
 
 SkObject *sk_callable_create(SkVM *vm, SkCallFunction func) {
     SkObject *self = sk_object_new(vm);
+    sk_object_set_activatable(self, TRUE);
     sk_object_set_call_func(self, func);
     return self;
 }
@@ -69,16 +71,39 @@ void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func) {
     sk_object_set_slot(self, name, sk_callable_create(self->vm, func));
 }
 
+_Bool sk_object_to_bool(SkObject *self) {
+    return sk_vm_skelde_to_bool(
+            SK_VM,
+            sk_object_send_message_simple(self,
+                    sk_message_create_simple(
+                        SK_VM,
+                        "to_bool"
+                        )
+                )
+            );
+}
+
+SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg) {
+    sk_vm_callstack_push(SK_VM, self);
+    SkObject *result = sk_message_dispatch_simple(msg);
+    sk_vm_callstack_pop(SK_VM);
+    return result;
+}
+
 _Bool sk_object_get_activatable(SkObject *self) {
     /* has to be either `true` or `false`, otherwise we get into a nice
-       infinite recursion here, because we call to_bool, and it queries
-       getActivatable, and it asks toBool, ... */   
-/*    for(;;) {
-        
-    }*/
-    /* TODO */
-    return (self->call_func != NULL);
+       infinite recursion here, because we call toBool, and it queries
+       getActivatable, and it asks toBool, ... */
+    SkObject *obj = self;
+    /* This will never fail, because the `Object` proto has "activatable" set. */
+    for(;;) {
+        if(sk_object_has_slot(obj, "activatable")) {
+            return sk_vm_skelde_to_bool(SK_VM, sk_object_get_slot_lazy(obj, "activatable"));
+        }
+        obj = sk_object_get_proto(obj);
+    }
 }
+
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg) {
     return (self->dispatch_func)(self, self, msg);
 }
@@ -111,15 +136,15 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
     }
 }
 
-SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *message) {
-    SkObject *arguments = sk_message_get_arguments(message);
+SkObject *sk_object__set_slot(SkObject *slot, SkObject *self, SkObject *msg) {
+    SkObject *arguments = sk_message_get_arguments(msg);
     bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
     sk_object_set_slot_bstring(self, name, sk_list_get_at(arguments, 1));
     return self;
 }
 
-SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *message) {
-    SkObject *arguments = sk_message_get_arguments(message);
+SkObject *sk_object__get_slot(SkObject *_slot, SkObject *self, SkObject *msg) {
+    SkObject *arguments = sk_message_get_arguments(msg);
     bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
     
     SkObject *slot;
@@ -127,4 +152,9 @@ SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *message) 
         abort();
     } // uh ... make that nicer
     return slot;
+}
+
+SkObject *sk_object__to_bool(SkObject *slot, SkObject *self, SkObject *msg) {
+    /* every object evaluates to true as a default. */
+    return SK_VM->true; 
 }

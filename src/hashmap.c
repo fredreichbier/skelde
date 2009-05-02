@@ -196,7 +196,8 @@ int hashmap_put(Hashmap *in, int key, Any value){
 }
 
 /*
- * Get your pointer out of the hashmap with a key
+ * Get your pointer out of the hashmap with a key.
+ * Modification: you can set arg = NULL if you just want to test if the key exists.
  */
 int hashmap_get(Hashmap *in, int key, Any *arg){
 	int curr;
@@ -213,14 +214,16 @@ int hashmap_get(Hashmap *in, int key, Any *arg){
 	for(i = 0; i< m->table_size; i++){
 
 		if(m->data[curr].key == key && m->data[curr].in_use == 1){
-			*arg = (m->data[curr].data);
+            if(arg)
+    			*arg = (m->data[curr].data);
 			return MAP_OK;
 		}
 
 		curr = (curr + 1) % m->table_size;
 	}
 
-	*arg = NULL;
+    if(arg)
+    	*arg = NULL;
 
 	/* Not found */
 	return MAP_MISSING;

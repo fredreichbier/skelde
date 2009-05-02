@@ -10,7 +10,9 @@ void sk_message_init2(SkObject *self);
 SkObject *sk_message_clone(SkObject *self);
 SkObject *sk_message_create_proto(SkVM *vm);
 SkObject *sk_message_start_dispatch(SkObject *self);
+SkObject *sk_message_dispatch_simple(SkObject *self);
 SkObject *sk_message_dispatch_avalanche(SkObject *self);
+SkObject *sk_message_create_simple(SkVM *vm, char *name);
 DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
 
 #define sk_message_set_name(self, _name) \

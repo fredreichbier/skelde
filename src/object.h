@@ -6,6 +6,10 @@
 
 #include "hashmap.h"
 
+/* hm, that shouldn't be here. TODO */
+#define TRUE 1
+#define FALSE 0
+
 /* Sorry for the forward declaration! */
 struct _SkObject;
 struct _SkVM;
@@ -37,15 +41,24 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg);
 SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObject *message);
 SkObject *sk_callable_create(struct _SkVM *vm, SkCallFunction func);
 void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func);
+_Bool sk_object_to_bool(SkObject *self);
+SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg);
 
-SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *message);
-SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *message);
+SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
+SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
+SkObject *sk_object__to_bool(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)
 
 #define sk_object_get_data(obj) \
     ((SkObject *)(obj))->data
+
+#define sk_object_has_slot(obj, name) \
+    hashmap_get(((SkObject *)obj)->slots, hashmap_hash_string(name, strlen(name)), NULL) == MAP_OK
+
+#define sk_object_set_activatable(obj, VALUE) \
+    sk_object_set_slot(obj, "activatable", sk_vm_bool_to_skelde(obj->vm, VALUE))
 
 #define sk_object_set_init_func(obj, _func) \
     ((SkObject *)(obj))->init_func = (_func);
@@ -64,13 +77,19 @@ SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *message);
     hashmap_get((obj)->slots, hashmap_hash_bstring(name), (out))
 
 #define sk_object_set_clone_func(obj, func) \
-    ((SkObject *)(obj))->clone_func = (func);
+    ((SkObject *)(obj))->clone_func = (func)
 
 #define sk_object_set_dispatch_func(obj, func) \
-    ((SkObject *)(obj))->dispatch_func = (func);
+    ((SkObject *)(obj))->dispatch_func = (func)
 
 #define sk_object_set_call_func(obj, func) \
-    ((SkObject *)(obj))->call_func = (func);
+    ((SkObject *)(obj))->call_func = (func)
+
+#define sk_object_set_proto(obj, proto) \
+    sk_object_set_slot(obj, "proto", proto)
+
+#define sk_object_get_proto(obj) \
+    sk_object_get_slot_lazy(obj, "proto")
 
 #define SK_VM \
     (((SkObject *)self)->vm)

@@ -10,8 +10,32 @@
 #include "message.h"
 #include "skstring.h"
 
+static SkObject *_sk_vm_to_bool_false(SkObject *slot, SkObject *self, SkObject *msg) {
+    return self->vm->false;
+}
+
+static void _sk_vm_setup_true(SkObject *self) {
+    sk_object_set_activatable(self, FALSE);
+    sk_object_set_proto(self, sk_vm_get_proto(self->vm, "Object"));
+}
+
+static void _sk_vm_setup_false(SkObject *self) {
+    sk_object_set_activatable(self, FALSE);
+    sk_object_set_proto(self, sk_vm_get_proto(self->vm, "Object"));
+    sk_object_bind_method(self, "to_bool", &_sk_vm_to_bool_false);
+}
+
+static void _sk_vm_setup_nil(SkObject *self) {
+    sk_object_set_activatable(self, FALSE);
+    sk_object_set_proto(self, sk_vm_get_proto(self->vm, "Object"));
+    sk_object_bind_method(self, "to_bool", &_sk_vm_to_bool_false);
+}
+
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
+    vm->nil = sk_object_new(vm);
+    vm->true = sk_object_new(vm);
+    vm->false = sk_object_new(vm);
     /* The lobby is not a real object ... ok? */
     vm->lobby = sk_object_new(vm);
     SkObject *uberproto = sk_object_create_proto(vm);
@@ -22,10 +46,14 @@ SkVM *sk_vm_new() {
     sk_vm_add_proto(vm, "List", sk_list_create_proto(vm));
     sk_vm_add_proto(vm, "Message", sk_message_create_proto(vm));
     sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
-    /* nil is none. */
-    vm->nil = sk_object_new(vm);
     cvector_create(&vm->callstack, sizeof(SkObject *), 10);
     sk_vm_callstack_push(vm, vm->lobby);
+
+    sk_object_set_activatable(uberproto, FALSE);
+    _sk_vm_setup_true(vm->true);
+    _sk_vm_setup_false(vm->false);
+    _sk_vm_setup_nil(vm->nil);
+
     return vm;
 }
 
@@ -54,4 +82,19 @@ SkObject *sk_vm_dispatch_message(SkVM *vm, SkObject *message) {
 void sk_vm_callstack_push(SkVM *vm, SkObject *ctx) {
     // pass the pointer to a value, that means a pointer to a pointer to a SkObject.
     cvector_push(vm->callstack, &ctx); 
+}
+
+SkObject *sk_vm_bool_to_skelde(SkVM *vm, _Bool boolean) {
+    return boolean ? vm->true : vm->false;
+}
+
+_Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value) {
+    if(value == vm->true) {
+        return TRUE;
+    } else if(value == vm->false) {
+        return FALSE;
+    } else {
+        printf("Cannot convert Object to _Bool.\n"); /* TODO */
+        return TRUE;
+    }
 }

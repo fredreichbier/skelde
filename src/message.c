@@ -129,3 +129,10 @@ SkObject *sk_message_dispatch_avalanche(SkObject *self) {
         self = sk_message_get_previous(self);
     return sk_message_start_dispatch(self);
 }
+
+SkObject *sk_message_create_simple(SkVM *vm, char *name) {
+    SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "Message"));
+    sk_message_set_name(self,
+            sk_string_from_bstring(vm, bfromcstr(name)));
+    return self;
+}
