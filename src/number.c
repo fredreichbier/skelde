@@ -4,6 +4,7 @@
 #include "hashmap.h"
 #include "vm.h"
 #include "number.h"
+#include "skstring.h"
 
 void sk_number_init(SkObject *self) {
     int *data = sk_malloc(sizeof(int));
@@ -17,10 +18,11 @@ SkObject *sk_number_create_proto(SkVM *vm) {
     sk_object_set_init_func(self, &sk_number_init);
     sk_object_set_clone_func(self, &sk_number_clone);
 
-    SkObject *object;
-    assert(sk_object_get_slot(vm->lobby, "Object", (void **)&object) == MAP_OK);
+    sk_object_put_slot(self, "proto", sk_vm_get_proto(vm, "Object"));
 
-    sk_object_put_slot(self, "proto", object);
+    /* methods */
+    sk_object_bind_method(self, "to_string", &sk_number__to_string);
+
     return self;
 }
 
@@ -32,6 +34,10 @@ SkObject *sk_number_create(SkVM *vm, int value) {
     SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "Number"));
     sk_number_set_int(self, value);
     return self;
+}
+
+SkObject *sk_number__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_string_from_bstring(SK_VM, bformat("%d", sk_number_get_int(self)));
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?

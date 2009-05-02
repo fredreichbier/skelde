@@ -52,10 +52,6 @@ SkObject *sk_bytecode_parse_message(SkVM *vm, FILE *stream) {
     if(fread(&argcount, sizeof(unsigned char), 1, stream) != 1) {
         abort();
     }
-    printf("Oh look. '%s' (%d) has %d arguments.\n",
-            bstr2cstr(name, '!'),
-            name->slen,
-            argcount);
     unsigned char i;
     for(i = 0; i < argcount; i++) {
         SkObject *arg = sk_bytecode_parse_avalanche(vm, stream);

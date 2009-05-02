@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     sk_object_set_slot(vm->lobby, "foo", sk_string_from_bstring(vm, bfromcstr("bar")));
 
     SkObject *avalanche = sk_bytecode_parse_filename(vm, "test.sk");
-    SkObject *result = sk_message_dispatch_avalanche(avalanche);
+    sk_message_dispatch_avalanche(avalanche);
 
     return 0;
 }

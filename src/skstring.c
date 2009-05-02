@@ -13,9 +13,10 @@ SkObject *sk_string_create_proto(SkVM *vm) {
     sk_object_set_init_func(self, &sk_string_init);
     sk_object_set_clone_func(self, &sk_string_clone);
 
-    SkObject *object;
-    sk_object_get_slot(vm->lobby, "Object", (void **)&object);
-    sk_object_put_slot(self, "proto", object);
+    sk_object_set_proto(self, sk_vm_get_proto(vm, "Object"));
+    
+    /* methods */
+    sk_object_bind_method(self, "to_string", &sk_string__to_string);
 
     return self;
 }
@@ -26,8 +27,11 @@ void sk_string_set_bstring(SkObject *self, bstring string) {
 
 SkObject *sk_string_from_bstring(SkVM *vm, bstring string) {
     SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "String"));
-    printf("making '%s' (%d)...\n", bstr2cstr(string, '~'), string->slen);
     sk_string_set_bstring(self, string);
+    return self;
+}
+
+SkObject *sk_string__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
     return self;
 }
 

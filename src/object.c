@@ -42,6 +42,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     /* set methods */
     SkObject *self = sk_object_new(vm);
     sk_object_bind_method(self, "to_bool", &sk_object__to_bool);
+    sk_object_bind_method(self, "to_string", &sk_object__to_string);
     sk_object_bind_method(self, "to_repr", &sk_object__to_repr);
     sk_object_bind_method(self, "print", &sk_object__print);
     sk_object_bind_method(self, "println", &sk_object__println);
@@ -84,6 +85,17 @@ bstring sk_object_to_repr(SkObject *self) {
                     sk_message_create_simple(
                         SK_VM,
                         "to_repr"
+                        )
+                )
+            );
+}
+
+bstring sk_object_to_string(SkObject *self) {
+    return sk_string_get_bstring(
+            sk_object_send_message_simple(self,
+                    sk_message_create_simple(
+                        SK_VM,
+                        "to_string"
                         )
                 )
             );
@@ -182,7 +194,7 @@ SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg) {
 }
 
 SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg) {
-    printf("%s", bstr2cstr(sk_object_to_repr(self), '\\'));
+    printf("%s", bstr2cstr(sk_object_to_string(self), '\\'));
     return self;
 }
 
@@ -190,4 +202,8 @@ SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg) {
     sk_object__print(slot, self, msg);
     printf("\n");
     return self;
+}
+
+SkObject *sk_object__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_object__to_repr(slot, self, msg);    
 }

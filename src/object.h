@@ -45,11 +45,13 @@ _Bool sk_object_to_bool(SkObject *self);
 SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg);
 bstring sk_object_to_repr_simple(SkObject *self);
 bstring sk_object_to_repr(SkObject *self);
+bstring sk_object_to_string(SkObject *self);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__to_bool(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__to_string(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg);
 

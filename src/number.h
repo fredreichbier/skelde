@@ -10,6 +10,8 @@ void sk_number_set_int(SkObject *self, int value);
 DECLARE_LAZY_CLONE_FUNC(sk_number_clone);
 SkObject *sk_number_create(SkVM *vm, int value);
 
+SkObject *sk_number__to_string(SkObject *slot, SkObject *self, SkObject *msg);
+
 #define sk_number_get_int(obj) \
     (*(int *)sk_object_get_data(obj))
 
