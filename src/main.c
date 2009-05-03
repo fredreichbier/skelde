@@ -1,25 +1,23 @@
 #include <stdio.h>
 
 #include "vm.h"
-#include "skstring.h"
-#include "bstrlib.h"
-#include "object.h"
-#include "number.h"
-#include "message.h"
 #include "bytecode.h"
-
-SkObject *sk_test(SkObject *slot, SkObject *self, SkObject *msg) {
-    printf("TEST CALLED\n");
-    return self->vm->nil;
-}
+#include "message.h"
 
 int main(int argc, char** argv) {
     SkVM *vm = sk_vm_new();
-    sk_object_bind_method(vm->lobby, "test", &sk_test);
-    sk_object_set_slot(vm->lobby, "foo", sk_string_from_bstring(vm, bfromcstr("bar")));
+    SkObject *avalanche; 
+    int i;
+    
+    if(argc == 1) {
+        printf("skelde vm\nUsage:\tskelde FILE [FILE ...]\n");
+        return 1;
+    }
 
-    SkObject *avalanche = sk_bytecode_parse_filename(vm, "test.sk");
-    sk_message_dispatch_avalanche(avalanche);
+    for(i = 1; i < argc; i++) {
+        avalanche = sk_bytecode_parse_filename(vm, argv[i]);
+        sk_message_dispatch_avalanche(avalanche);
+    }
     
     return 0;
 }
