@@ -8,6 +8,7 @@
 #include "message.h"
 #include "vm.h"
 #include "number.h"
+#include "exception.h"
 
 /* creates a new skelde object and returns it. */
 SkObject *sk_object_new(SkVM *vm) {
@@ -50,6 +51,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "get_slot", &sk_object__get_slot);
     sk_object_bind_method(self, "break", &sk_object__break);
     sk_object_bind_method(self, "continue", &sk_object__continue);
+    sk_object_bind_method(self, "if", &sk_object__if);
     return self;
 }
 
@@ -231,4 +233,36 @@ SkObject *sk_object__break(SkObject *slot, SkObject *self, SkObject *msg) {
 SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg) {
     sk_exc_jump(SK_VM, SK_JUMP_CODE_CONTINUE);
     return self;
+}
+
+/* The `if` message:
+ * if(condition,
+ *      block,
+ *    condition,
+ *      block,
+ *    else_block)  
+ */
+SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
+    ArgCount argcount = sk_message_argcount(msg);
+    ArgCount blocks = argcount % 2;
+    ArgCount i;
+    sk_message_check_argcount(msg, "Object if", 1);
+    /* if we have only one argument, return it as a bool */
+    if(argcount == 1) {
+        return sk_vm_bool_to_skelde(SK_VM, sk_object_to_bool(sk_message_eval_arg_at(msg, 0)));
+    }
+    for(i = 0; i < blocks; i++) {
+        if(sk_vm_skelde_to_bool(SK_VM,
+                    sk_message_eval_arg_at(msg, i * 2))) {
+            /* argument is true */
+            return sk_message_eval_arg_at(msg, i * 2 + 1);
+        }
+    }
+    /* we have an else block */
+    if(blocks * 2 < argcount) {
+        return sk_message_eval_arg_at(msg, argcount - 1);
+    } else {
+        /* no condition was true. return `false`. */
+        return SK_VM->false;
+    }
 }

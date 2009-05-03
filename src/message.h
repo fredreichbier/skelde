@@ -39,5 +39,9 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
     sk_message_dispatch_avalanche(sk_message_arg_at(self, idx))
 #define sk_message_argcount(self) \
     sk_list_size(sk_message_get_arguments(self))
-
+#define sk_message_check_argcount(self, name, min) \
+    if(sk_message_argcount(self) < min) { \
+        sk_exc_raise(self->vm, sk_exception_create_lazy(self->vm, "ArgumentError", \
+                    bfromcstr("The message `" name "` expects at least " #min " arguments."))); \
+    }
 #endif

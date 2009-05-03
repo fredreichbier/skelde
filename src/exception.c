@@ -17,6 +17,8 @@ SkObject *sk_exception_create_proto(SkVM *vm) {
 void sk_exception_load_protos(SkObject *proto, SkObject *ctx) {
     SkObject *type_error = sk_object_clone(proto);
     sk_object_set_slot(ctx, "TypeError", type_error);
+
+    sk_object_set_slot(ctx, "ArgumentError", sk_object_clone(proto));
 }
 
 SkObject *sk_exception_create_lazy(SkVM *vm, char *protoname, bstring message) {

@@ -58,6 +58,7 @@ SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__break(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)

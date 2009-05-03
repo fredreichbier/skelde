@@ -55,8 +55,11 @@ SkVM *sk_vm_new() {
 
     sk_object_set_activatable(uberproto, FALSE);
     _sk_vm_setup_true(vm->true);
+    sk_vm_add_proto(vm, "true", vm->true);
     _sk_vm_setup_false(vm->false);
+    sk_vm_add_proto(vm, "false", vm->false);
     _sk_vm_setup_nil(vm->nil);
+    sk_vm_add_proto(vm, "nil", vm->nil);
 
     return vm;
 }
