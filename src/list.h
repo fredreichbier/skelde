@@ -11,6 +11,8 @@ void sk_list_append(SkObject *self, SkObject *item);
 SkObject *sk_list_get_at(SkObject *self, int index);
 SkObject *sk_list_create(SkVM *vm);
 
+SkObject *sk_list__get_at(SkObject *slot, SkObject *self, SkObject *msg);
+
 #define sk_list_get_data(obj) \
     ((CVector *)sk_object_get_data(obj))
 #define sk_list_size(obj) \

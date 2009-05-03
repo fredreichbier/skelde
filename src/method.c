@@ -2,6 +2,7 @@
 #include "message.h"
 #include "list.h"
 #include "exception.h"
+#include "call.h"
 
 /* init: clone a method, but don't set stuff from proto.
  * and method clones are activatable!
@@ -38,6 +39,10 @@ SkObject *sk_method__clone(SkObject *slot, SkObject *self, SkObject *msg) {
 SkObject *sk_method_call(SkObject *self, SkObject *parentctx, SkObject *call_msg) {
     SkObject *msg = sk_method_get_message(self);
     SkObject *ctx = sk_object_create_child_context(parentctx);
+    SkObject *call = sk_object_clone(sk_vm_get_proto(SK_VM, "Call"));
+    sk_call_set_message(call, call_msg);
+    sk_object_set_slot(ctx, "call", call);
+
     sk_vm_callstack_push(SK_VM, ctx);
     SkObject *result = sk_message_dispatch_avalanche(msg);
     sk_vm_callstack_pop(SK_VM);

@@ -15,6 +15,8 @@ SkObject *sk_message_dispatch_avalanche(SkObject *self);
 SkObject *sk_message_create_simple(SkVM *vm, char *name);
 DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
 
+SkObject *sk_message__dispatch(SkObject *slot, SkObject *self, SkObject *msg);
+
 #define sk_message_set_name(self, _name) \
     sk_object_put_slot(self, "name", _name)
 #define sk_message_set_arguments(self, _arguments) \
@@ -44,4 +46,5 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
         sk_exc_raise(self->vm, sk_exception_create_lazy(self->vm, "ArgumentError", \
                     bfromcstr("The message `" name "` expects at least " #min " arguments."))); \
     }
+
 #endif

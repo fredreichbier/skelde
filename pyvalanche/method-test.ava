@@ -1,2 +1,9 @@
-set_slot("test", Method clone("Hello World from a method!" println));
-test
+set_slot("test1", 
+    Method clone("Hello World from a method!" println));
+test1;
+
+set_slot("test2",
+    Method clone(
+        "Hello " +(call message arguments get_at(0) dispatch) println
+    ));
+test2("World");

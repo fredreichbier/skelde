@@ -41,14 +41,12 @@ void sk_message_init2(SkObject *self) {
 }
 
 SkObject *sk_message_create_proto(SkVM* vm) {
-    SkObject *self = sk_object_new(vm);
+    SkObject *self = sk_object_clone(sk_vm_get_proto(vm, "Object"));
     sk_object_set_init_func(self, &sk_message_init);
     sk_object_set_clone_func(self, &sk_message_clone);
     
-    SkObject *object;
-    sk_object_get_slot(vm->lobby, "Object", (void **)&object); /* never fail. */
-
-    sk_object_put_slot(self, "proto", object);
+    /* methods */
+    sk_object_bind_method(self, "dispatch", &sk_message__dispatch);
     return self;
 }
 
@@ -140,4 +138,8 @@ SkObject *sk_message_create_simple(SkVM *vm, char *name) {
     sk_message_set_name(self,
             sk_string_from_bstring(vm, bfromcstr(name)));
     return self;
+}
+
+SkObject *sk_message__dispatch(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_message_dispatch_avalanche(self);
 }
