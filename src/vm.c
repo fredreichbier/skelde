@@ -9,7 +9,9 @@
 #include "list.h"
 #include "message.h"
 #include "skstring.h"
+#include "method.h"
 #include "exception.h"
+#include "call.h"
 
 static SkObject *_sk_vm_to_bool_false(SkObject *slot, SkObject *self, SkObject *msg) {
     return self->vm->false;
@@ -49,6 +51,9 @@ SkVM *sk_vm_new() {
     sk_vm_add_proto(vm, "Message", sk_message_create_proto(vm));
     sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
     sk_vm_add_proto(vm, "Exception", sk_exception_create_proto(vm));
+    sk_vm_add_proto(vm, "Method", sk_method_create_proto(vm));
+    sk_vm_add_proto(vm, "Call", sk_call_create_proto(vm));
+
     sk_exception_load_protos(sk_vm_get_proto(vm, "Exception"), vm->lobby);
     cvector_create(&vm->callstack, sizeof(SkObject *), 10);
     sk_vm_callstack_push(vm, vm->lobby);
@@ -68,6 +73,8 @@ SkVM *sk_vm_new() {
     _set_proto_name("Message");
     _set_proto_name("String");
     _set_proto_name("Exception");
+    _set_proto_name("Method");
+    _set_proto_name("Call");
 
     sk_object_set_name(vm->true, bfromcstr("true"));
     sk_object_set_name(vm->false, bfromcstr("false"));

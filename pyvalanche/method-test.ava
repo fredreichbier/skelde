@@ -1,0 +1,2 @@
+set_slot("test", Method clone("Hello World from a method!" println));
+test

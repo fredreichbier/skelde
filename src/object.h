@@ -49,6 +49,7 @@ bstring sk_object_to_repr_simple(SkObject *self);
 bstring sk_object_to_repr(SkObject *self);
 bstring sk_object_to_string(SkObject *self);
 bstring sk_object_get_name_recursive(SkObject *self);
+SkObject *sk_object_create_child_context(SkObject *self);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
@@ -120,10 +121,11 @@ SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg);
         sk_object_put_slot(other, "proto", self); \
         sk_object_set_dispatch_func(other, self->dispatch_func); \
         sk_object_set_call_func(other, self->call_func); \
+        sk_object_set_clone_func(other, self->clone_func); \
+        other->init_func = self->init_func; \
         if(self->init_func) { \
             (self->init_func)(other); \
         } \
-        other->init_func = self->init_func; \
         return other; \
     }
 

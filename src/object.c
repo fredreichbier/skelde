@@ -172,6 +172,12 @@ _Bool sk_object_get_activatable(SkObject *self) {
     }
 }
 
+SkObject *sk_object_create_child_context(SkObject *self) {
+    SkObject *ctx = sk_object_new(SK_VM); /* TODO: clone `Object`? */
+    sk_object_set_slot(ctx, "self", self);
+    return ctx;
+}
+
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg) {
     return (self->dispatch_func)(self, self, msg);
 }
