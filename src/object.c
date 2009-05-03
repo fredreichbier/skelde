@@ -198,7 +198,6 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
         // no slot. search recursively in the proto.
         if(!sk_object_has_slot(self, "proto")) {
             // we have no proto. return NULL.
-            printf("No proto.\n");
             return NULL;
         } else {
             return sk_object_dispatch_message_simple(sk_object_get_slot_lazy(self, "proto"),
