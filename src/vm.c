@@ -61,9 +61,18 @@ SkVM *sk_vm_new() {
     _sk_vm_setup_nil(vm->nil);
     sk_vm_add_proto(vm, "nil", vm->nil);
 
+#define _set_proto_name(PROTO) sk_object_set_name(sk_vm_get_proto(vm, PROTO), bfromcstr(PROTO))
+    sk_object_set_name(uberproto, bfromcstr("Object"));
+    _set_proto_name("Number");
+    _set_proto_name("List");
+    _set_proto_name("Message");
+    _set_proto_name("String");
+    _set_proto_name("Exception");
+
     sk_object_set_name(vm->true, bfromcstr("true"));
     sk_object_set_name(vm->false, bfromcstr("false"));
     sk_object_set_name(vm->nil, bfromcstr("nil"));
+#undef _set_proto_name
 
     return vm;
 }

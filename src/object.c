@@ -15,7 +15,6 @@ SkObject *sk_object_new(SkVM *vm) {
     SkObject *obj = sk_malloc(sizeof(SkObject));
     obj->vm = vm;
     obj->slots = hashmap_new();
-    sk_object_put_slot(obj, "proto", NULL); // TODO: nicer?
     obj->data = NULL;
     obj->init_func = NULL;
     obj->clone_func = &sk_object_clone_base;
@@ -94,12 +93,28 @@ void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func) {
 }
 
 bstring sk_object_to_repr_simple(SkObject *self) {
-    SkObject *name = sk_object_get_slot_recursive(self, "name");
-    if(!name) {
-        return bformat("<Object at 0x%x>", (unsigned int)self);
-    } else {
-        return bformat("<%s at 0x%x>", sk_string_get_bstring(name)->data, (unsigned int)self);
+    return bformat("<%s at 0x%x>",
+            sk_object_get_name_recursive(self)->data,
+            (unsigned int)self);
+}
+
+bstring sk_object_get_name_recursive(SkObject *self) {
+    SkObject *root = self;
+    unsigned int count = 0, i = 0;
+    /* will never fail, because all objects are descendants of Object,
+     * and it has `name` set. */
+    while(!sk_object_has_slot(root, "name")) {
+        root = sk_object_get_slot_lazy(root, "proto");
+        count++;
     }
+    bstring name = bstrcpy(sk_string_get_bstring(
+                sk_object_get_slot_lazy(root, "name")));
+    if(i > count) {
+        /* blubblubblubbunderflow? */
+        abort();
+    }
+    binsertch(name, name->slen, count, '^');
+    return name;
 }
 
 bstring sk_object_to_repr(SkObject *self) {
@@ -174,14 +189,13 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
         return slot;
     } else if(ret == MAP_MISSING) {
         // no slot. search recursively in the proto.
-        SkObject *proto;
-        sk_object_get_slot(self, "proto", (void **)&proto);
-        if(!proto) {
+        if(!sk_object_has_slot(self, "proto")) {
             // we have no proto. return NULL.
             printf("No proto.\n");
             return NULL;
         } else {
-            return sk_object_dispatch_message_simple(proto, ctx, message);
+            return sk_object_dispatch_message_simple(sk_object_get_slot_lazy(self, "proto"),
+                    ctx, message);
         }
     } else {
         // THAT WILL NEVER RETURN SOMETHING ELSE!
@@ -190,20 +204,21 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
 }
 
 SkObject *sk_object__set_slot(SkObject *slot, SkObject *self, SkObject *msg) {
-    SkObject *arguments = sk_message_get_arguments(msg);
-    bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
-    sk_object_set_slot_bstring(self, name, sk_list_get_at(arguments, 1));
+    sk_message_check_argcount(msg, "Object set_slot", 2);
+    bstring name = sk_string_get_bstring(sk_message_eval_arg_at(msg, 0));
+    sk_object_set_slot(self, bstr2cstr(name, '\\'), sk_message_eval_arg_at(msg, 1));
     return self;
 }
 
 SkObject *sk_object__get_slot(SkObject *_slot, SkObject *self, SkObject *msg) {
-    SkObject *arguments = sk_message_get_arguments(msg);
-    bstring name = sk_string_get_bstring(sk_list_get_at(arguments, 0));
-    
-    SkObject *slot;
-    if(sk_object_get_slot_bstring(self, name, (void **)&slot) != MAP_OK) {
-        abort();
-    } // uh ... make that nicer
+    sk_message_check_argcount(msg, "Object get_slot", 1);
+    bstring name = sk_string_get_bstring(sk_message_eval_arg_at(msg, 0));
+    SkObject *slot = sk_object_get_slot_recursive(self, bstr2cstr(name, '\\'));
+    if(!slot) {
+        sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM,
+                    "SlotError", bformat("The slot '%s' couldn't be found.",
+                        name->data)));
+    }
     return slot;
 }
 

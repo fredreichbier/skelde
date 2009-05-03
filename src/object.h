@@ -48,6 +48,7 @@ SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name);
 bstring sk_object_to_repr_simple(SkObject *self);
 bstring sk_object_to_repr(SkObject *self);
 bstring sk_object_to_string(SkObject *self);
+bstring sk_object_get_name_recursive(SkObject *self);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
