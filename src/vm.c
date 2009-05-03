@@ -66,20 +66,20 @@ SkVM *sk_vm_new() {
     _sk_vm_setup_nil(vm->nil);
     sk_vm_add_proto(vm, "nil", vm->nil);
 
-#define _set_proto_name(PROTO) sk_object_set_name(sk_vm_get_proto(vm, PROTO), bfromcstr(PROTO))
-    sk_object_set_name(uberproto, bfromcstr("Object"));
-    _set_proto_name("Number");
-    _set_proto_name("List");
-    _set_proto_name("Message");
-    _set_proto_name("String");
-    _set_proto_name("Exception");
-    _set_proto_name("Method");
-    _set_proto_name("Call");
+#define _set_proto_tag(PROTO) sk_object_set_tag(sk_vm_get_proto(vm, PROTO), bfromcstr(PROTO))
+    sk_object_set_tag(uberproto, bfromcstr("Object"));
+    _set_proto_tag("Number");
+    _set_proto_tag("List");
+    _set_proto_tag("Message");
+    _set_proto_tag("String");
+    _set_proto_tag("Exception");
+    _set_proto_tag("Method");
+    _set_proto_tag("Call");
 
-    sk_object_set_name(vm->true, bfromcstr("true"));
-    sk_object_set_name(vm->false, bfromcstr("false"));
-    sk_object_set_name(vm->nil, bfromcstr("nil"));
-#undef _set_proto_name
+    sk_object_set_tag(vm->true, bfromcstr("true"));
+    sk_object_set_tag(vm->false, bfromcstr("false"));
+    sk_object_set_tag(vm->nil, bfromcstr("nil"));
+#undef _set_proto_tag
 
     return vm;
 }

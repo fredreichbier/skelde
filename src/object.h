@@ -48,7 +48,7 @@ SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name);
 bstring sk_object_to_repr_simple(SkObject *self);
 bstring sk_object_to_repr(SkObject *self);
 bstring sk_object_to_string(SkObject *self);
-bstring sk_object_get_name_recursive(SkObject *self);
+bstring sk_object_get_tag_recursive(SkObject *self);
 SkObject *sk_object_create_child_context(SkObject *self);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
@@ -130,9 +130,9 @@ SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
         return other; \
     }
 
-#define sk_object_set_name(OBJ, NAME) \
-    sk_object_set_slot(OBJ, "name", sk_string_from_bstring(OBJ->vm, NAME))
-#define sk_object_get_name(OBJ, NAME) \
-    sk_string_get_bstring(sk_object_get_slot_recursive(OBJ, "name"))
+#define sk_object_set_tag(OBJ, TAG) \
+    sk_object_set_slot(OBJ, "tag", sk_string_from_bstring(OBJ->vm, TAG))
+#define sk_object_get_tag(OBJ) \
+    sk_string_get_bstring(sk_object_get_slot_recursive(OBJ, "tag"))
 
 #endif

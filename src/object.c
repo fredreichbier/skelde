@@ -95,21 +95,21 @@ void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func) {
 
 bstring sk_object_to_repr_simple(SkObject *self) {
     return bformat("<%s at 0x%x>",
-            sk_object_get_name_recursive(self)->data,
+            sk_object_get_tag_recursive(self)->data,
             (unsigned int)self);
 }
 
-bstring sk_object_get_name_recursive(SkObject *self) {
+bstring sk_object_get_tag_recursive(SkObject *self) {
     SkObject *root = self;
     unsigned int count = 0, i = 0;
     /* will never fail, because all objects are descendants of Object,
      * and it has `name` set. */
-    while(!sk_object_has_slot(root, "name")) {
+    while(!sk_object_has_slot(root, "tag")) {
         root = sk_object_get_slot_lazy(root, "proto");
         count++;
     }
     bstring name = bstrcpy(sk_string_get_bstring(
-                sk_object_get_slot_lazy(root, "name")));
+                sk_object_get_slot_lazy(root, "tag")));
     if(i > count) {
         /* blubblubblubbunderflow? */
         abort();
