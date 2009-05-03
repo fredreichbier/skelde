@@ -44,16 +44,23 @@ SkObject *sk_number__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
 }
 
 SkObject *sk_number__times(SkObject *slot, SkObject *self, SkObject *msg) {
-    int i, d = 0;
+    int i;
+    _Bool break_ = 0;
     SkObject *result = SK_VM->nil;
     for(i = 0; i < sk_number_get_int(self); i++) {
         sk_exc_try(SK_VM) {
             result = sk_message_eval_arg_at(msg, 0);
         } sk_exc_except(SK_JUMP_CODE_BREAK) {
-            d = 1;
+            /* break, but break after `sk_exc_end_try` was called,
+             * otherwise we get an orphan jump context */
+            break_ = 1;
         } sk_exc_except(SK_JUMP_CODE_CONTINUE) {
+            /* do nothing ... */
+        } sk_exc_else {
+            /* pass the exception */
+            sk_exc_pass(SK_VM);
         } sk_exc_end_try(SK_VM);
-        if(d == 1) {
+        if(break_) {
             return result;
         }
     }

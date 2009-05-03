@@ -1,5 +1,16 @@
 "Halli" +("hallo") println;
-5 times("yay." println);
-5 times("foo" println; break);
-5 times("muh" println; continue; "NEVER READ THIS" println);
-"Error" +(5) println;
+5 times(
+    "yay." println
+);
+5 times(
+    "foo" println;
+    break;
+);
+5 times(
+    "muh" println; 
+    continue;
+    "NEVER READ THIS" println;
+);
+5 times(
+    "Raises an error" +(5) println;
+)

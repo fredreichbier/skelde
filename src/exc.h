@@ -36,11 +36,20 @@ typedef struct _SkJumpContext {
         switch(__jmp_code = setjmp(__jmp_ctx->jmp)) { \
             case 0:
 #define sk_exc_except(X) break; case X:
-#define sk_exc_pass(VM) sk_exc_jump(VM, __jmp_code)
+#define sk_exc_else break; default:
+
+/* we can do that here: if we jump, the current execution context
+ * is invalidated: sk_exc_end_try will never be called. So we
+ * have no double-pop. */
+#define sk_exc_pass(VM) \
+                VM->callstack = __jmp_ctx->callstack; \
+                sk_vm_pop_jmp_context(VM); \
+                sk_exc_jump(VM, __jmp_code)
+
 #define sk_exc_end_try(VM) \
         } \
         VM->callstack = __jmp_ctx->callstack; \
+        sk_vm_pop_jmp_context(VM); \
         } while(0); \
-        sk_vm_pop_jmp_context(VM)
 
 #endif
