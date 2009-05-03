@@ -48,6 +48,8 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "println", &sk_object__println);
     sk_object_bind_method(self, "set_slot", &sk_object__set_slot);
     sk_object_bind_method(self, "get_slot", &sk_object__get_slot);
+    sk_object_bind_method(self, "break", &sk_object__break);
+    sk_object_bind_method(self, "continue", &sk_object__continue);
     return self;
 }
 
@@ -219,4 +221,14 @@ SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg) {
 
 SkObject *sk_object__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
     return sk_object__to_repr(slot, self, msg);    
+}
+
+SkObject *sk_object__break(SkObject *slot, SkObject *self, SkObject *msg) {
+    sk_exc_jump(SK_VM, SK_JUMP_CODE_BREAK);
+    return self;
+}
+
+SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg) {
+    sk_exc_jump(SK_VM, SK_JUMP_CODE_CONTINUE);
+    return self;
 }

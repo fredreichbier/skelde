@@ -3,6 +3,8 @@
 #include "mem.h"
 #include "hashmap.h"
 #include "vm.h"
+#include "message.h"
+#include "list.h"
 #include "number.h"
 #include "skstring.h"
 
@@ -22,6 +24,7 @@ SkObject *sk_number_create_proto(SkVM *vm) {
 
     /* methods */
     sk_object_bind_method(self, "to_string", &sk_number__to_string);
+    sk_object_bind_method(self, "times", &sk_number__times);
 
     return self;
 }
@@ -38,6 +41,23 @@ SkObject *sk_number_create(SkVM *vm, int value) {
 
 SkObject *sk_number__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
     return sk_string_from_bstring(SK_VM, bformat("%d", sk_number_get_int(self)));
+}
+
+SkObject *sk_number__times(SkObject *slot, SkObject *self, SkObject *msg) {
+    int i, d = 0;
+    SkObject *result = SK_VM->nil;
+    for(i = 0; i < sk_number_get_int(self); i++) {
+        sk_exc_try(SK_VM) {
+            result = sk_message_eval_arg_at(msg, 0);
+        } sk_exc_except(SK_JUMP_CODE_BREAK) {
+            d = 1;
+        } sk_exc_except(SK_JUMP_CODE_CONTINUE) {
+        } sk_exc_end_try(SK_VM);
+        if(d == 1) {
+            return result;
+        }
+    }
+    return result;
 }
 
 DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?
