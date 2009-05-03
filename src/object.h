@@ -9,6 +9,7 @@
 /* hm, that shouldn't be here. TODO */
 #define TRUE 1
 #define FALSE 0
+typedef unsigned char ArgCount;
 
 /* Sorry for the forward declaration! */
 struct _SkObject;

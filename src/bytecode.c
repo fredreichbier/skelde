@@ -29,8 +29,8 @@ SkObject *sk_bytecode_parse_stream(SkVM *vm, FILE *stream) {
     if(!(sig[0] == 's' && sig[1] == 'k' 
                 && sig[2] == SK_BYTECODE_VERSION_MAJOR 
                 && sig[3] == SK_BYTECODE_VERSION_MINOR)) {
-        printf("The bytecode signature is not supported.\n");
-        return NULL;
+        printf("The given bytecode signature is not supported.\n");
+        abort();
     }
     /* now, parse */
     return sk_bytecode_parse_avalanche(vm, stream);
@@ -48,8 +48,8 @@ SkObject *sk_bytecode_parse_message(SkVM *vm, FILE *stream) {
     bdelete(name, name->slen - 1, 1);
     /* set the message's name and read the argument count */
     sk_message_set_name(self, sk_string_from_bstring(vm, name));
-    unsigned char argcount;
-    if(fread(&argcount, sizeof(unsigned char), 1, stream) != 1) {
+    ArgCount argcount;
+    if(fread(&argcount, sizeof(ArgCount), 1, stream) != 1) {
         abort();
     }
     unsigned char i;

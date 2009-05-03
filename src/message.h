@@ -37,5 +37,7 @@ DECLARE_LAZY_CLONE_FUNC(sk_message_clone);
     sk_list_get_at(sk_message_get_arguments(self), idx)
 #define sk_message_eval_arg_at(self, idx) \
     sk_message_dispatch_avalanche(sk_message_arg_at(self, idx))
+#define sk_message_argcount(self) \
+    sk_list_size(sk_message_get_arguments(self))
 
 #endif

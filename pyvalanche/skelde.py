@@ -1,6 +1,6 @@
 from struct import pack
 
-BYTECODE_VERSION = '\x00\x01'
+BYTECODE_VERSION = '\x00\x02'
 
 OP_MESSAGE = 1
 OP_EOA = 2
