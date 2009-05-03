@@ -59,6 +59,7 @@ SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__break(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_set_data(obj, _data) \
     ((SkObject *)(obj))->data = (_data)
@@ -124,5 +125,10 @@ SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg);
         other->init_func = self->init_func; \
         return other; \
     }
+
+#define sk_object_set_name(OBJ, NAME) \
+    sk_object_set_slot(OBJ, "name", sk_string_from_bstring(OBJ->vm, NAME))
+#define sk_object_get_name(OBJ, NAME) \
+    sk_string_get_bstring(sk_object_get_slot_recursive(OBJ, "name"))
 
 #endif

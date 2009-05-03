@@ -1,2 +1,5 @@
 if(true, "true is true" println, "true is false" println);
 if(false, "false is true" println, "false is false" println);
+true println;
+5 ==(4) println;
+5 ==(5) println;

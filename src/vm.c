@@ -61,6 +61,10 @@ SkVM *sk_vm_new() {
     _sk_vm_setup_nil(vm->nil);
     sk_vm_add_proto(vm, "nil", vm->nil);
 
+    sk_object_set_name(vm->true, bfromcstr("true"));
+    sk_object_set_name(vm->false, bfromcstr("false"));
+    sk_object_set_name(vm->nil, bfromcstr("nil"));
+
     return vm;
 }
 

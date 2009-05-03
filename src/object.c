@@ -51,6 +51,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "get_slot", &sk_object__get_slot);
     sk_object_bind_method(self, "break", &sk_object__break);
     sk_object_bind_method(self, "continue", &sk_object__continue);
+    sk_object_bind_method(self, "==", &sk_object__equals);
     sk_object_bind_method(self, "if", &sk_object__if);
     return self;
 }
@@ -93,7 +94,12 @@ void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func) {
 }
 
 bstring sk_object_to_repr_simple(SkObject *self) {
-    return bformat("<Object at 0x%x>", (unsigned int)self);
+    SkObject *name = sk_object_get_slot_recursive(self, "name");
+    if(!name) {
+        return bformat("<Object at 0x%x>", (unsigned int)self);
+    } else {
+        return bformat("<%s at 0x%x>", sk_string_get_bstring(name)->data, (unsigned int)self);
+    }
 }
 
 bstring sk_object_to_repr(SkObject *self) {
@@ -265,4 +271,9 @@ SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
         /* no condition was true. return `false`. */
         return SK_VM->false;
     }
+}
+
+/* Object == checks for identitiy. */
+SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_vm_bool_to_skelde(SK_VM, self == sk_message_eval_arg_at(msg, 0));
 }
