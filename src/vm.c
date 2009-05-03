@@ -9,6 +9,7 @@
 #include "list.h"
 #include "message.h"
 #include "skstring.h"
+#include "exception.h"
 
 static SkObject *_sk_vm_to_bool_false(SkObject *slot, SkObject *self, SkObject *msg) {
     return self->vm->false;
@@ -36,6 +37,7 @@ SkVM *sk_vm_new() {
     vm->nil = sk_object_new(vm);
     vm->true = sk_object_new(vm);
     vm->false = sk_object_new(vm);
+    vm->exc = NULL;
     /* The lobby is not a real object ... ok? */
     vm->lobby = sk_object_new(vm);
     SkObject *uberproto = sk_object_create_proto(vm);
@@ -46,6 +48,8 @@ SkVM *sk_vm_new() {
     sk_vm_add_proto(vm, "List", sk_list_create_proto(vm));
     sk_vm_add_proto(vm, "Message", sk_message_create_proto(vm));
     sk_vm_add_proto(vm, "String", sk_string_create_proto(vm));
+    sk_vm_add_proto(vm, "Exception", sk_exception_create_proto(vm));
+    sk_exception_load_protos(sk_vm_get_proto(vm, "Exception"), vm->lobby);
     cvector_create(&vm->callstack, sizeof(SkObject *), 10);
     sk_vm_callstack_push(vm, vm->lobby);
 
@@ -97,4 +101,46 @@ _Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value) {
         printf("Cannot convert Object to _Bool.\n"); /* TODO */
         return TRUE;
     }
+}
+
+SkJumpContext *sk_vm_push_jmp_context(SkVM *vm) {
+     if(!vm->jmp_ctx) {
+        vm->jmp_ctx = sk_malloc(sizeof(SkJumpContext));
+        vm->jmp_ctx->next = NULL;
+     } else {
+        SkJumpContext *new = sk_malloc(sizeof(SkJumpContext));
+        new->next = vm->jmp_ctx;
+        vm->jmp_ctx = new;
+     }
+     vm->jmp_ctx->callstack = cvector_copy(vm->callstack);
+     return vm->jmp_ctx;
+}
+
+SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm) {
+    assert(vm->jmp_ctx != NULL);
+    SkJumpContext *old = vm->jmp_ctx;
+    vm->jmp_ctx = vm->jmp_ctx->next;
+    return old;
+}
+
+void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
+    switch(code) {
+        case SK_JUMP_CODE_EXCEPTION:
+            printf("[skelde] Unhandled Exception: %s\n",
+                    bstr2cstr(
+                        sk_string_get_bstring(
+                            sk_object_get_slot_lazy( /* TODO: exception's message HAS to be a String */
+                                vm->exc,
+                                "message"
+                                )
+                            ),
+                        '\\'
+                        )
+                  );
+            break;
+        default:
+            printf("[skelde] Strange jump code detected: %d. That should never happen.",
+                    code);
+    }
+    abort();
 }

@@ -60,6 +60,19 @@ SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
     return slot;
 }
 
+SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name) {
+    SkObject *slot;
+    for(;;) {
+        if(sk_object_get_slot(self, name, (void **)&slot) == MAP_OK) {
+            return slot;
+        }
+        if(!sk_object_has_slot(self, "proto"))
+            break;
+        self = sk_object_get_slot_lazy(self, "proto");
+    }
+    return NULL;
+}
+
 SkObject *sk_object_call(SkObject *self, SkObject *ctx, SkObject *message) {
     return (self->call_func)(self, ctx, message);
 }

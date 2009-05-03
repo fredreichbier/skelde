@@ -43,6 +43,7 @@ SkObject *sk_callable_create(struct _SkVM *vm, SkCallFunction func);
 void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func);
 _Bool sk_object_to_bool(SkObject *self);
 SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg);
+SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name);
 bstring sk_object_to_repr_simple(SkObject *self);
 bstring sk_object_to_repr(SkObject *self);
 bstring sk_object_to_string(SkObject *self);

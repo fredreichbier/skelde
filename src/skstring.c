@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "skstring.h"
+#include "exception.h"
 #include "list.h"
 #include "message.h"
 
@@ -41,8 +42,8 @@ SkObject *sk_string__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
 SkObject *sk_string__concat(SkObject *slot, SkObject *self, SkObject *msg) {
     SkObject *other = sk_message_eval_arg_at(msg, 0);
     if(!sk_string_check(other)) {
-        printf("second operand has to be a string.\n");
-        abort();
+        sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM, "TypeError",
+                    bfromcstr("first argument of `String +` must be a string!")));
     }
     bstring dup = bstrcpy(sk_string_get_bstring(self));
     bconcat(dup, sk_string_get_bstring(other));

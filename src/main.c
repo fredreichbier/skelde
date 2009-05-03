@@ -20,6 +20,6 @@ int main(int argc, char** argv) {
 
     SkObject *avalanche = sk_bytecode_parse_filename(vm, "test.sk");
     sk_message_dispatch_avalanche(avalanche);
-
+    
     return 0;
 }
