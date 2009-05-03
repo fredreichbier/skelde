@@ -1,0 +1,14 @@
+"Hello. I'm the skelde vm." println;
+"Halli-" +("Hallo") +("!") println;
+"Is 5 == 5? " print
+if(5 ==(5),
+    "It is." println
+    ,
+    "It is not." println
+);
+set_slot("hello", "world");
+get_slot("hello") println;
+
+Number set_slot("testing_slot", "It works!");
+Number testing_slot println;
+1337 testing_slot println;
