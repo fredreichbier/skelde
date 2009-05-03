@@ -52,6 +52,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "continue", &sk_object__continue);
     sk_object_bind_method(self, "==", &sk_object__equals);
     sk_object_bind_method(self, "if", &sk_object__if);
+    sk_object_bind_method(self, "clone", &sk_object__clone);
     return self;
 }
 
@@ -297,4 +298,8 @@ SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
 /* Object == checks for identitiy. */
 SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg) {
     return sk_vm_bool_to_skelde(SK_VM, self == sk_message_eval_arg_at(msg, 0));
+}
+
+SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_object_clone(self);
 }

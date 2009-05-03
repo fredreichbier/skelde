@@ -7,3 +7,5 @@ set_slot("test2",
         "Hello " +(call message arguments get_at(0) dispatch) println
     ));
 test2("World");
+
+i_do_not_exist;

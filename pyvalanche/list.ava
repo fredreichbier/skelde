@@ -1,0 +1,4 @@
+set_slot("mylist", List clone);
+mylist append(4) append(5);
+mylist get_at(0) println;
+mylist get_at(3) println;

@@ -4,6 +4,7 @@
 #include "objlist.h"
 #include "skstring.h"
 #include "number.h"
+#include "exception.h"
 #include "list.h"
 
 /* a message has the following slots:
@@ -99,7 +100,8 @@ SkObject *sk_message_dispatch_simple(SkObject *self) {
                 return result;
             }
         }
-        printf("The message '%s' couldn't be dispatched. I'm sorry.\n", bstr2cstr(name, '\\'));
+        sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM, "MessageError",
+                    bformat("Nobody is answering to the message '%s'.", name->data)));
         return NULL;
     }
 }
