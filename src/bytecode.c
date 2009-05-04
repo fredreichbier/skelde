@@ -48,11 +48,10 @@ SkObject *sk_bytecode_parse_message(SkVM *vm, FILE *stream) {
     bdelete(name, name->slen - 1, 1);
     /* set the message's name and read the argument count */
     sk_message_set_name(self, sk_string_from_bstring(vm, name));
-    ArgCount argcount;
+    ArgCount argcount, i;
     if(fread(&argcount, sizeof(ArgCount), 1, stream) != 1) {
         abort();
     }
-    unsigned char i;
     for(i = 0; i < argcount; i++) {
         SkObject *arg = sk_bytecode_parse_avalanche(vm, stream);
         sk_message_append_argument(self, arg); 
