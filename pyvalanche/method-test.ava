@@ -8,3 +8,11 @@ set_slot("test2",
     ));
 test2("World");
 
+set_slot("magic",
+    Method clone(foo,
+        bar println
+    )
+);
+get_slot("magic") argument_names set_at(0, "bar");
+
+magic("Maaaaaagic!");
