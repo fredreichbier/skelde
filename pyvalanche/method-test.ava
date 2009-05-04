@@ -16,3 +16,5 @@ set_slot("magic",
 get_slot("magic") argument_names set_at(0, "bar");
 
 magic("Maaaaaagic!");
+
+dunno;

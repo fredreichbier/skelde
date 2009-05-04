@@ -1,6 +1,7 @@
 #include "thread.h"
 #include "message.h"
 #include "mem.h"
+#include "objlist.h"
 
 void sk_thread_init(SkObject *self) {
     sk_object_set_data(self, (void *)sk_malloc(sizeof(SkThreadData)));
@@ -21,19 +22,20 @@ DEFINE_LAZY_CLONE_FUNC(sk_thread_clone);
 
 void *_sk_thread_task(void *self_) {
     SkObject *self = (SkObject *)self_;
-    SkObject *message = sk_thread_get_message(self);
-    return (void *)sk_message_dispatch_avalanche(message);
+    sk_vm_setup_thread(SK_VM);
+    SkObject *message = sk_message_dispatch_avalanche(sk_thread_get_message(self));
+    pthread_exit((void *)message);
 }
 
 void sk_thread_start(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
-    GC_pthread_create(&data->thread, NULL, &_sk_thread_task, (void *)self);
+    pthread_create(&data->thread, NULL, &_sk_thread_task, (void *)self);
 }
 
 SkObject *sk_thread_join(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
     SkObject *result;
-    GC_pthread_join(data->thread, (void **)&result);
+    pthread_join(data->thread, (void **)&result);
     return result;
 }
 

@@ -93,13 +93,15 @@ SkObject *sk_message_dispatch_simple(SkObject *self) {
     /* a message. */
     else {
         int i;
-        for(i = cvector_size(self->vm->callstack) - 1; i >= 0; i--) {
-            SkObject *object = objlist_get_at(self->vm->callstack, i);
+        for(i = cvector_size(sk_vm_callstack(SK_VM)) - 1; i >= 0; i--) {
+            SkObject *object = objlist_get_at(sk_vm_callstack(SK_VM), i);
             result = sk_object_dispatch_message(object, self);
             if(result) {
                 return result;
             }
         }
+        sk_printf("name: %s\n", name->data);
+        sk_printf("thread: 0x%x\n", (unsigned int)pthread_self());
         sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM, "MessageError",
                     bformat("Nobody is answering to the message '%s'.", name->data)));
         return NULL;

@@ -13,6 +13,7 @@
 #include "thread.h"
 #include "exception.h"
 #include "call.h"
+#include "mutex.h"
 
 static SkObject *_sk_vm_to_bool_false(SkObject *slot, SkObject *self, SkObject *msg) {
     return self->vm->false;
@@ -37,10 +38,13 @@ static void _sk_vm_setup_nil(SkObject *self) {
 
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
+    pthread_key_create(&vm->callstack_key, NULL);
+    pthread_key_create(&vm->jmp_ctx_key, NULL);
+    pthread_key_create(&vm->exc_key, NULL);
     vm->nil = sk_object_new(vm);
     vm->true = sk_object_new(vm);
     vm->false = sk_object_new(vm);
-    vm->exc = NULL;
+    sk_vm_set_exc(vm, NULL);
     /* The lobby is not a real object ... ok? */
     vm->lobby = sk_object_new(vm);
     SkObject *uberproto = sk_object_create_proto(vm);
@@ -55,10 +59,9 @@ SkVM *sk_vm_new() {
     sk_vm_add_proto(vm, "Method", sk_method_create_proto(vm));
     sk_vm_add_proto(vm, "Call", sk_call_create_proto(vm));
     sk_vm_add_proto(vm, "Thread", sk_thread_create_proto(vm));
+    sk_vm_add_proto(vm, "Mutex", sk_mutex_create_proto(vm));
 
     sk_exception_load_protos(sk_vm_get_proto(vm, "Exception"), vm->lobby);
-    cvector_create(&vm->callstack, sizeof(SkObject *), 10);
-    sk_vm_callstack_push(vm, vm->lobby);
 
     sk_object_set_activatable(uberproto, FALSE);
     _sk_vm_setup_true(vm->true);
@@ -78,6 +81,7 @@ SkVM *sk_vm_new() {
     _set_proto_tag("Method");
     _set_proto_tag("Call");
     _set_proto_tag("Thread");
+    _set_proto_tag("Mutex");
 
     sk_object_set_tag(vm->true, bfromcstr("true"));
     sk_object_set_tag(vm->false, bfromcstr("false"));
@@ -95,23 +99,9 @@ SkObject *sk_vm_get_proto(SkVM *vm, const char *name) {
     return sk_object_get_slot_lazy(vm->lobby, name); 
 }
 
-/* try at the top of the callstack, then go to 0. If no receiver found, return NULL */
-SkObject *sk_vm_dispatch_message(SkVM *vm, SkObject *message) {
-    int i = cvector_size(vm->callstack) - 1;
-    while(i >= 0) {
-        SkObject *ctx = objlist_get_at(vm->callstack, i); 
-        SkObject *result = sk_object_dispatch_message(ctx, message);
-        if(result != NULL) {
-            return result;
-        }
-        i--;
-    }
-    return NULL;
-}
-
 void sk_vm_callstack_push(SkVM *vm, SkObject *ctx) {
     // pass the pointer to a value, that means a pointer to a pointer to a SkObject.
-    cvector_push(vm->callstack, &ctx); 
+    cvector_push(sk_vm_callstack(vm), &ctx); 
 }
 
 SkObject *sk_vm_bool_to_skelde(SkVM *vm, _Bool boolean) {
@@ -130,22 +120,21 @@ _Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value) {
 }
 
 SkJumpContext *sk_vm_push_jmp_context(SkVM *vm) {
-     if(!vm->jmp_ctx) {
-        vm->jmp_ctx = sk_malloc(sizeof(SkJumpContext));
-        vm->jmp_ctx->next = NULL;
-     } else {
-        SkJumpContext *new = sk_malloc(sizeof(SkJumpContext));
-        new->next = vm->jmp_ctx;
-        vm->jmp_ctx = new;
-     }
-     vm->jmp_ctx->callstack = cvector_copy(vm->callstack);
-     return vm->jmp_ctx;
+    SkJumpContext *new = sk_malloc(sizeof(SkJumpContext));
+    if(!sk_vm_jmp_ctx(vm)) {
+        new->next = NULL;
+    } else {
+        new->next = sk_vm_jmp_ctx(vm);
+    }
+    sk_vm_set_jmp_ctx(vm, new);
+    new->callstack = cvector_copy(sk_vm_callstack(vm));
+    return new;
 }
 
 SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm) {
-    assert(vm->jmp_ctx != NULL);
-    SkJumpContext *old = vm->jmp_ctx;
-    vm->jmp_ctx = vm->jmp_ctx->next;
+    SkJumpContext *old = sk_vm_jmp_ctx(vm);
+    assert(old != NULL);
+    sk_vm_set_jmp_ctx(vm, old->next);
     return old;
 }
 
@@ -156,7 +145,7 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
                     bstr2cstr(
                         sk_string_get_bstring(
                             sk_object_get_slot_lazy( /* TODO: exception's message HAS to be a String */
-                                vm->exc,
+                                sk_vm_exc(vm),
                                 "message"
                                 )
                             ),
@@ -169,4 +158,11 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
                     code);
     }
     abort();
+}
+
+void sk_vm_setup_thread(SkVM *vm) {
+    CVector *callstack;
+    cvector_create(&callstack, sizeof(SkObject *), 10);
+    pthread_setspecific(vm->callstack_key, (void *)callstack);
+    sk_vm_callstack_push(vm, vm->lobby);
 }

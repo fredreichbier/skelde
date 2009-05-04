@@ -22,14 +22,14 @@ typedef struct _SkJumpContext {
     sk_exc_jump(VM, SK_JUMP_CODE_EXCEPTION);
 
 #define sk_exc_jump(VM, CODE) \
-    if(!VM->jmp_ctx) { \
+    if(!sk_vm_jmp_ctx(VM)) { \
         sk_vm_handle_root_exception(VM, CODE); \
     } else { \
-        longjmp(VM->jmp_ctx->jmp, CODE); \
+        longjmp(sk_vm_jmp_ctx(VM)->jmp, CODE); \
     }
 
 #define sk_exc_set(VM, EXC) \
-    VM->exc = EXC;
+    sk_vm_set_exc(VM, EXC)
 #define sk_exc_try(VM) \
     do { SkJumpContext *__jmp_ctx = sk_vm_push_jmp_context(VM); \
         int __jmp_code; \
@@ -42,13 +42,13 @@ typedef struct _SkJumpContext {
  * is invalidated: sk_exc_end_try will never be called. So we
  * have no double-pop. */
 #define sk_exc_pass(VM) \
-                VM->callstack = __jmp_ctx->callstack; \
+                sk_vm_set_callstack(VM, __jmp_ctx->callstack); \
                 sk_vm_pop_jmp_context(VM); \
                 sk_exc_jump(VM, __jmp_code)
 
 #define sk_exc_end_try(VM) \
         } \
-        VM->callstack = __jmp_ctx->callstack; \
+        sk_vm_set_callstack(VM, __jmp_ctx->callstack); \
         sk_vm_pop_jmp_context(VM); \
         } while(0); \
 

@@ -6,6 +6,7 @@
 
 typedef struct _SkThreadData {
     pthread_t thread;
+    CVector *parent_callstack;
 } SkThreadData;
 
 void sk_thread_init(SkObject *self);
@@ -20,6 +21,6 @@ SkObject *sk_thread__start(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_thread__join(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_thread_get_data(SELF) ((SkThreadData *)sk_object_get_data(SELF))
-#define sk_thread_get_message(SELF) sk_object_get_slot_recursive(SELF, "message");
+#define sk_thread_get_message(SELF) sk_object_get_slot_recursive(SELF, "message")
 
 #endif

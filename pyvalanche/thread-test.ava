@@ -1,16 +1,21 @@
 set_slot("shared", 0);
+set_slot("mutex", Mutex clone);
 
 set_slot("a", Thread clone);
 set_slot("b", Thread clone);
 
 a set_slot("message", message(
     100 times(
-        update_slot("shared", shared +(1))
+        mutex lock;
+        update_slot("shared", shared +(1));
+        mutex unlock #; why, oh why, mustn't i set a semicolon here?
     )
 ));
 b set_slot("message", message(
     100 times(
-        update_slot("shared", shared +(1))
+        mutex lock;
+        update_slot("shared", shared +(1));
+        mutex unlock # (the same)
     )
 ));
 
@@ -20,4 +25,5 @@ b start;
 a join;
 b join;
 
+# should be 200.
 shared println;

@@ -12,3 +12,7 @@ get_slot("hello") println;
 Number set_slot("testing_slot", "It works!");
 Number testing_slot println;
 1337 testing_slot println;
+
+5 times(
+    "heho" println
+)
