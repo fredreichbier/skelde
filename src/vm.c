@@ -37,8 +37,6 @@ static void _sk_vm_setup_nil(SkObject *self) {
 
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
-    pthread_mutex_init(&vm->stdout_mutex, NULL);
-
     vm->nil = sk_object_new(vm);
     vm->true = sk_object_new(vm);
     vm->false = sk_object_new(vm);
@@ -126,7 +124,7 @@ _Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value) {
     } else if(value == vm->false) {
         return FALSE;
     } else {
-        sk_vm_printf(vm, "Cannot convert Object to _Bool.\n"); /* TODO */
+        sk_printf("Cannot convert Object to _Bool.\n"); /* TODO */
         return TRUE;
     }
 }
@@ -154,7 +152,7 @@ SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm) {
 void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
     switch(code) {
         case SK_JUMP_CODE_EXCEPTION:
-            sk_vm_printf(vm, "[skelde] Unhandled Exception: %s\n",
+            sk_printf("[skelde] Unhandled Exception: %s\n",
                     bstr2cstr(
                         sk_string_get_bstring(
                             sk_object_get_slot_lazy( /* TODO: exception's message HAS to be a String */
@@ -167,17 +165,8 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
                   );
             break;
         default:
-            sk_vm_printf(vm, "[skelde] Strange jump code detected: %d. That should never happen.",
+            sk_printf("[skelde] Strange jump code detected: %d. That should never happen.",
                     code);
     }
     abort();
-}
-
-void sk_vm_printf(SkVM *vm, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    pthread_mutex_lock(&vm->stdout_mutex);
-    vprintf(format, args);
-    pthread_mutex_unlock(&vm->stdout_mutex);
-    va_end(args);
 }

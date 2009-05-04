@@ -92,7 +92,7 @@ void sk_object_set_data(SkObject *self, void *data) {
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
     SkObject *slot;
     if(sk_object_get_slot(self, name, &slot) != MAP_OK) {
-        sk_vm_printf(SK_VM, "Couldn't find slot '%s'.\n", name);
+        sk_printf("Couldn't find slot '%s'.\n", name);
         abort();
     }
     return slot;
@@ -271,13 +271,13 @@ SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg) {
 }
 
 SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg) {
-    sk_vm_printf(SK_VM, "%s", bstr2cstr(sk_object_to_string(self), '\\'));
+    sk_printf("%s", bstr2cstr(sk_object_to_string(self), '\\'));
     return self;
 }
 
 SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg) {
     sk_object__print(slot, self, msg);
-    sk_vm_printf(SK_VM, "\n");
+    sk_printf("\n");
     return self;
 }
 

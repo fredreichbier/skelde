@@ -12,7 +12,6 @@ typedef struct _SkVM {
     SkObject *exc; /* the current exception. TODO: use a stack? */
     SkJumpContext *jmp_ctx;
     CVector *callstack;
-    pthread_mutex_t stdout_mutex;
 } SkVM;
 
 SkVM *sk_vm_new();
@@ -25,8 +24,6 @@ _Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value);
 SkJumpContext *sk_vm_push_jmp_context(SkVM *vm);
 SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm);
 void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code);
-
-void sk_vm_printf(SkVM *vm, const char *format, ...);
 
 #define sk_vm_callstack_pop(VM) \
     cvector_pop((VM)->callstack)
