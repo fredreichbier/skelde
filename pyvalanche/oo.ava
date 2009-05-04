@@ -1,0 +1,17 @@
+set_slot("Human", Object clone);
+Human set_slot("to_string", Method clone(
+    "I'm a " +(self info) +(".")
+));
+Human set_slot("info", "human");
+Human println;
+
+set_slot("Man", Human clone);
+Man set_slot("info", "man");
+Man println;
+
+set_slot("Pupil", Man clone);
+Pupil set_slot("to_string", Method clone(
+    "Oh. I'm in the " +(self grade) +(". grade.")
+));
+Pupil set_slot("grade", "4");
+Pupil println;
