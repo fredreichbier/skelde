@@ -3,9 +3,8 @@ set_slot("test1",
 test1;
 
 set_slot("test2",
-    Method clone(
-        "Hello " +(call message arguments get_at(0) dispatch) println
+    Method clone(what, additional,
+        "Hello " +(what) println
     ));
 test2("World");
 
-i_do_not_exist;
