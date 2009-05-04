@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "mem.h"
 #include "hashmap.h"
 
 /* hm, that shouldn't be here. TODO */
@@ -24,6 +25,7 @@ typedef struct _SkObject {
     struct _SkVM *vm;
     Hashmap *slots;
     void *data;
+    pthread_mutex_t data_mutex, slots_mutex;
     /* customizable function pointers */
     SkInitFunction init_func;
     SkCloneFunction clone_func;
@@ -37,6 +39,11 @@ SkObject *sk_object_clone_base(SkObject *self);
 SkObject *sk_object_create_proto(struct _SkVM *vm);
 SkObject *sk_object_call(SkObject *self, SkObject *ctx, SkObject *message);
 _Bool sk_object_get_activatable(SkObject *self);
+void sk_object_set_data(SkObject *self, void *data);
+int sk_object_get_slot(SkObject *self, const char *slot, SkObject **out);
+void sk_object_set_slot(SkObject *self, const char *name, SkObject *value);
+int sk_object_get_slot_bstring(SkObject *self, const_bstring name, SkObject **out);
+
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg);
 SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObject *message);
@@ -63,15 +70,13 @@ SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
-
-#define sk_object_set_data(obj, _data) \
-    ((SkObject *)(obj))->data = (_data)
-
-#define sk_object_get_data(obj) \
-    ((SkObject *)(obj))->data
+SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_has_slot(obj, name) \
-    hashmap_get(((SkObject *)obj)->slots, hashmap_hash_string(name, strlen(name)), NULL) == MAP_OK
+    sk_object_get_slot(obj, name, NULL) == MAP_OK
+
+#define sk_object_get_data(obj) \
+    ((SkObject *)obj)->data
 
 #define sk_object_set_activatable(obj, VALUE) \
     sk_object_set_slot(obj, "activatable", sk_vm_bool_to_skelde(obj->vm, VALUE))
@@ -79,18 +84,7 @@ SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
 #define sk_object_set_init_func(obj, _func) \
     ((SkObject *)(obj))->init_func = (_func);
 
-#define sk_object_put_slot(obj, name, value) \
-    hashmap_put((obj)->slots, hashmap_hash_string((name), strlen((name))), (value))
-
-#define sk_object_set_slot sk_object_put_slot
-#define sk_object_set_slot_bstring(obj, name, value) \
-    hashmap_put((obj)->slots, hashmap_hash_bstring(name), (value))
-
-#define sk_object_get_slot(obj, name, out) \
-    hashmap_get((obj)->slots, hashmap_hash_string((name), strlen((name))), (out))
-
-#define sk_object_get_slot_bstring(obj, name, out) \
-    hashmap_get((obj)->slots, hashmap_hash_bstring(name), (out))
+#define sk_object_put_slot sk_object_set_slot
 
 #define sk_object_set_clone_func(obj, func) \
     ((SkObject *)(obj))->clone_func = (func)

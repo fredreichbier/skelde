@@ -4,7 +4,9 @@
 #include <assert.h>
 #include <memory.h>
 
-#include "gc.h"
+#define GC_PTHREADS
+#include <pthread.h>
+#include <gc/gc.h>
 
 static inline void *sk_malloc(size_t size) {
     return GC_MALLOC(size);

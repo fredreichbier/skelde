@@ -77,8 +77,8 @@ uint32_t hashmap_hash_string(const char * data, int len) {
     return hash;
 }
 
-uint32_t hashmap_hash_bstring(bstring bs) {
-    return hashmap_hash_string(bstr2cstr(bs, ':'), blength(bs)); // TODO: really convert all \0 to ':'?
+uint32_t hashmap_hash_bstring(const_bstring bs) {
+    return hashmap_hash_string(bstr2cstr(bs, '\\'), blength(bs)); // TODO: really convert all \0 to ':'?
 }
 
 /*

@@ -10,6 +10,7 @@
 #include "message.h"
 #include "skstring.h"
 #include "method.h"
+#include "thread.h"
 #include "exception.h"
 #include "call.h"
 
@@ -36,6 +37,8 @@ static void _sk_vm_setup_nil(SkObject *self) {
 
 SkVM *sk_vm_new() {
     SkVM *vm = sk_malloc(sizeof(SkVM));
+    pthread_mutex_init(&vm->stdout_mutex, NULL);
+
     vm->nil = sk_object_new(vm);
     vm->true = sk_object_new(vm);
     vm->false = sk_object_new(vm);
@@ -53,6 +56,7 @@ SkVM *sk_vm_new() {
     sk_vm_add_proto(vm, "Exception", sk_exception_create_proto(vm));
     sk_vm_add_proto(vm, "Method", sk_method_create_proto(vm));
     sk_vm_add_proto(vm, "Call", sk_call_create_proto(vm));
+    sk_vm_add_proto(vm, "Thread", sk_thread_create_proto(vm));
 
     sk_exception_load_protos(sk_vm_get_proto(vm, "Exception"), vm->lobby);
     cvector_create(&vm->callstack, sizeof(SkObject *), 10);
@@ -75,6 +79,7 @@ SkVM *sk_vm_new() {
     _set_proto_tag("Exception");
     _set_proto_tag("Method");
     _set_proto_tag("Call");
+    _set_proto_tag("Thread");
 
     sk_object_set_tag(vm->true, bfromcstr("true"));
     sk_object_set_tag(vm->false, bfromcstr("false"));
@@ -121,7 +126,7 @@ _Bool sk_vm_skelde_to_bool(SkVM *vm, SkObject *value) {
     } else if(value == vm->false) {
         return FALSE;
     } else {
-        printf("Cannot convert Object to _Bool.\n"); /* TODO */
+        sk_vm_printf(vm, "Cannot convert Object to _Bool.\n"); /* TODO */
         return TRUE;
     }
 }
@@ -149,7 +154,7 @@ SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm) {
 void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
     switch(code) {
         case SK_JUMP_CODE_EXCEPTION:
-            printf("[skelde] Unhandled Exception: %s\n",
+            sk_vm_printf(vm, "[skelde] Unhandled Exception: %s\n",
                     bstr2cstr(
                         sk_string_get_bstring(
                             sk_object_get_slot_lazy( /* TODO: exception's message HAS to be a String */
@@ -162,8 +167,17 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
                   );
             break;
         default:
-            printf("[skelde] Strange jump code detected: %d. That should never happen.",
+            sk_vm_printf(vm, "[skelde] Strange jump code detected: %d. That should never happen.",
                     code);
     }
     abort();
+}
+
+void sk_vm_printf(SkVM *vm, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    pthread_mutex_lock(&vm->stdout_mutex);
+    vprintf(format, args);
+    pthread_mutex_unlock(&vm->stdout_mutex);
+    va_end(args);
 }

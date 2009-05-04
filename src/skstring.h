@@ -16,7 +16,7 @@ SkObject *sk_string__to_string(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_string__concat(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_string_get_bstring(obj) \
-    ((bstring)((SkObject*)(obj))->data)
+    ((bstring)sk_object_get_data((SkObject *)obj))
 
 #define sk_string_as_charp(obj) \
     bstr2cstr(sk_string_get_bstring(obj), '\0')

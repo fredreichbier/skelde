@@ -1,0 +1,16 @@
+set_slot("a", Thread clone);
+set_slot("b", Thread clone);
+
+a set_slot("message", message(
+    100 times(
+        "a" println
+    )
+));
+b set_slot("message", message(
+    100 times(
+        "b" println
+    )
+));
+
+a start;
+b start;

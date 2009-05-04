@@ -15,6 +15,8 @@ SkObject *sk_object_new(SkVM *vm) {
     SkObject *obj = sk_malloc(sizeof(SkObject));
     obj->vm = vm;
     obj->slots = hashmap_new();
+    pthread_mutex_init(&obj->data_mutex, NULL);
+    pthread_mutex_init(&obj->slots_mutex, NULL);
     obj->data = NULL;
     obj->init_func = NULL;
     obj->clone_func = &sk_object_clone_base;
@@ -53,13 +55,44 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "==", &sk_object__equals);
     sk_object_bind_method(self, "if", &sk_object__if);
     sk_object_bind_method(self, "clone", &sk_object__clone);
+    sk_object_bind_method(self, "message", &sk_object__message);
     return self;
+}
+
+int sk_object_get_slot(SkObject *self, const char *name, SkObject **out) {
+    pthread_mutex_lock(&self->slots_mutex);
+    int ret = hashmap_get(self->slots,
+            hashmap_hash_string(name, strlen(name)), 
+            (void**)out);
+    pthread_mutex_unlock(&self->slots_mutex);
+    return ret;
+}
+
+int sk_object_get_slot_bstring(SkObject *self, const_bstring name, SkObject **out) {
+    pthread_mutex_lock(&self->slots_mutex);
+    int ret = hashmap_get(self->slots,
+            hashmap_hash_bstring(name), 
+            (void**)out);
+    pthread_mutex_unlock(&self->slots_mutex);
+    return ret;
+}
+
+void sk_object_set_slot(SkObject *self, const char *name, SkObject *value) {
+    pthread_mutex_lock(&self->slots_mutex);
+    hashmap_put(self->slots, hashmap_hash_string(name, strlen(name)), value);
+    pthread_mutex_unlock(&self->slots_mutex);
+}
+
+void sk_object_set_data(SkObject *self, void *data) {
+    pthread_mutex_lock(&self->data_mutex);
+    self->data = data;
+    pthread_mutex_unlock(&self->data_mutex);
 }
 
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
     SkObject *slot;
-    if(sk_object_get_slot(self, name, (void **)&slot) != MAP_OK) {
-        printf("Couldn't find slot '%s'.\n", name);
+    if(sk_object_get_slot(self, name, &slot) != MAP_OK) {
+        sk_vm_printf(SK_VM, "Couldn't find slot '%s'.\n", name);
         abort();
     }
     return slot;
@@ -68,7 +101,7 @@ SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
 SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name) {
     SkObject *slot;
     for(;;) {
-        if(sk_object_get_slot(self, name, (void **)&slot) == MAP_OK) {
+        if(sk_object_get_slot(self, name, &slot) == MAP_OK) {
             return slot;
         }
         if(!sk_object_has_slot(self, "proto"))
@@ -187,7 +220,7 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
     // TODO: type checking
     bstring name = sk_string_get_bstring(sk_object_get_slot_lazy(message, "name"));
     SkObject *slot;
-    int ret = sk_object_get_slot_bstring(self, name, (void **)&slot);
+    int ret = sk_object_get_slot_bstring(self, name, (SkObject **)&slot);
     if(ret == MAP_OK) {
         /* if activatable: call it. */
         if(sk_object_get_activatable(slot)) {
@@ -238,13 +271,13 @@ SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg) {
 }
 
 SkObject *sk_object__print(SkObject *slot, SkObject *self, SkObject *msg) {
-    printf("%s", bstr2cstr(sk_object_to_string(self), '\\'));
+    sk_vm_printf(SK_VM, "%s", bstr2cstr(sk_object_to_string(self), '\\'));
     return self;
 }
 
 SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg) {
     sk_object__print(slot, self, msg);
-    printf("\n");
+    sk_vm_printf(SK_VM, "\n");
     return self;
 }
 
@@ -296,9 +329,15 @@ SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
 
 /* Object == checks for identitiy. */
 SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg) {
+    /* TODO: error check */
     return sk_vm_bool_to_skelde(SK_VM, self == sk_message_eval_arg_at(msg, 0));
 }
 
 SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg) {
     return sk_object_clone(self);
+}
+
+SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg) {
+    /* TODO: error check */
+    return sk_message_arg_at(msg, 0);
 }

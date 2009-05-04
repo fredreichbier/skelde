@@ -19,5 +19,7 @@ int main(int argc, char** argv) {
         sk_message_dispatch_avalanche(avalanche);
     }
     
+    pthread_exit(NULL);
+
     return 0;
 }

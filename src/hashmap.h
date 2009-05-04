@@ -46,7 +46,7 @@ typedef struct _hashmap_map{
 } Hashmap;
 
 uint32_t hashmap_hash_string(const char * data, int len);
-uint32_t hashmap_hash_bstring(bstring bs);
+uint32_t hashmap_hash_bstring(const_bstring bs);
 
 /*
  * PFany is a pointer to a function that can take two Any arguments

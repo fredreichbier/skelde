@@ -31,7 +31,9 @@ SkObject *sk_number_create_proto(SkVM *vm) {
 }
 
 void sk_number_set_int(SkObject *self, int value) {
+    pthread_mutex_lock(&self->data_mutex);
     *(int *)self->data = value;
+    pthread_mutex_unlock(&self->data_mutex);
 }
 
 SkObject *sk_number_create(SkVM *vm, int value) {

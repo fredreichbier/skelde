@@ -29,7 +29,7 @@ SkObject *sk_bytecode_parse_stream(SkVM *vm, FILE *stream) {
     if(!(sig[0] == 's' && sig[1] == 'k' 
                 && sig[2] == SK_BYTECODE_VERSION_MAJOR 
                 && sig[3] == SK_BYTECODE_VERSION_MINOR)) {
-        printf("The given bytecode signature is not supported.\n");
+        sk_vm_printf(vm, "The given bytecode signature is not supported.\n");
         abort();
     }
     /* now, parse */
@@ -79,7 +79,7 @@ SkObject *sk_bytecode_parse_avalanche(SkVM *vm, FILE *stream) {
             case SK_OPCODE_EOA:
                 return msg;
             default:
-                printf("Unknown opcode: %u\n", opcode);
+                sk_vm_printf(vm, "Unknown opcode: %u\n", opcode);
                 abort();
         }
     }
