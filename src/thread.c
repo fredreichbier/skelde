@@ -13,6 +13,7 @@ SkObject *sk_thread_create_proto(SkVM *vm) {
     sk_thread_init(self);
     /* methods */
     sk_object_bind_method(self, "start", &sk_thread__start);
+    sk_object_bind_method(self, "join", &sk_thread__join);
     return self;
 }
 
@@ -21,8 +22,7 @@ DEFINE_LAZY_CLONE_FUNC(sk_thread_clone);
 void *_sk_thread_task(void *self_) {
     SkObject *self = (SkObject *)self_;
     SkObject *message = sk_thread_get_message(self);
-    sk_message_dispatch_avalanche(message);
-    return NULL;
+    return (void *)sk_message_dispatch_avalanche(message);
 }
 
 void sk_thread_start(SkObject *self) {
@@ -30,7 +30,18 @@ void sk_thread_start(SkObject *self) {
     GC_pthread_create(&data->thread, NULL, &_sk_thread_task, (void *)self);
 }
 
+SkObject *sk_thread_join(SkObject *self) {
+    SkThreadData *data = sk_thread_get_data(self);
+    SkObject *result;
+    GC_pthread_join(data->thread, (void **)&result);
+    return result;
+}
+
 SkObject *sk_thread__start(SkObject *slot, SkObject *self, SkObject *msg) {
     sk_thread_start(self);
     return self;
+}
+
+SkObject *sk_thread__join(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_thread_join(self);
 }

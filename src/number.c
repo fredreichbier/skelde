@@ -25,6 +25,7 @@ SkObject *sk_number_create_proto(SkVM *vm) {
     /* methods */
     sk_object_bind_method(self, "to_string", &sk_number__to_string);
     sk_object_bind_method(self, "==", &sk_number__equals);
+    sk_object_bind_method(self, "+", &sk_number__add);
     sk_object_bind_method(self, "times", &sk_number__times);
 
     return self;
@@ -75,4 +76,9 @@ DEFINE_LAZY_CLONE_FUNC(sk_number_clone); // isn't that evil?
 SkObject *sk_number__equals(SkObject *slot, SkObject *self, SkObject *msg) {
     return sk_vm_bool_to_skelde(SK_VM,
             sk_number_get_int(self) == sk_number_get_int(sk_message_eval_arg_at(msg, 0)));
+}
+
+SkObject *sk_number__add(SkObject *slot, SkObject *self, SkObject *msg) {
+    return sk_number_create(SK_VM,
+            sk_number_get_int(self) + sk_number_get_int(sk_message_eval_arg_at(msg, 0)));
 }

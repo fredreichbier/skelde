@@ -67,6 +67,7 @@ SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_has_slot(obj, name) \
     sk_object_get_slot(obj, name, NULL) == MAP_OK

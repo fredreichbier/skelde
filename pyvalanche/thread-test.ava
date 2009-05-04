@@ -1,16 +1,23 @@
+set_slot("shared", 0);
+
 set_slot("a", Thread clone);
 set_slot("b", Thread clone);
 
 a set_slot("message", message(
     100 times(
-        "a" println
+        update_slot("shared", shared +(1))
     )
 ));
 b set_slot("message", message(
     100 times(
-        "b" println
+        update_slot("shared", shared +(1))
     )
 ));
 
 a start;
 b start;
+
+a join;
+b join;
+
+shared println;

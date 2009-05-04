@@ -56,6 +56,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "if", &sk_object__if);
     sk_object_bind_method(self, "clone", &sk_object__clone);
     sk_object_bind_method(self, "message", &sk_object__message);
+    sk_object_bind_method(self, "update_slot", &sk_object__update_slot);
     return self;
 }
 
@@ -340,4 +341,15 @@ SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg) {
 SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg) {
     /* TODO: error check */
     return sk_message_arg_at(msg, 0);
+}
+
+SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg) {
+    sk_message_check_argcount(msg, "Object update_slot", 2);
+    bstring name = sk_string_get_bstring(sk_message_eval_arg_at(msg, 0));
+    if(sk_object_has_slot(self, bstr2cstr(name, '\\'))) {
+        sk_object_set_slot(self, bstr2cstr(name, '\\'), sk_message_eval_arg_at(msg, 1));
+        return self;
+    } else {
+        return NULL; /* Oooo-haaaa! That is DIRTY! */
+    }
 }

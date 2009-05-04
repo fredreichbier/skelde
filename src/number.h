@@ -13,6 +13,7 @@ SkObject *sk_number_create(SkVM *vm, int value);
 SkObject *sk_number__to_string(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_number__times(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_number__equals(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_number__add(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_number_get_int(obj) \
     (*(int *)sk_object_get_data(obj))
