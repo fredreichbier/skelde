@@ -1,8 +1,8 @@
 CC=gcc
 MAKE=make
-LIBS=-lgc
+LIBS=-pthread -ldl -lgc
 INCLUDES=
-CFLAGS=-g -Wall -Werror -pthread
+CFLAGS=-Wall -Werror -g
 
 EXECUTABLE=skelde
 OBJECTS=src/cvector.o src/hashmap.o src/bstrlib.o \

@@ -104,7 +104,7 @@ if __name__ == '__main__':
     msg = Parser(tokenize(text)).parse()
     full = msg.generate_full()
     if len(sys.argv) == 2:
-        print repr(full)
+        msg.print_me()
     else:
         with open(sys.argv[2], 'w') as f:
             f.write(full)

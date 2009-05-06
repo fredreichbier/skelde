@@ -25,6 +25,7 @@ static inline void *sk_calloc (size_t nelem, size_t size) {
 
 static inline void sk_free(void *ptr) {
     // that's a no-op here.
+    ptr = NULL;
 }
 
 #endif

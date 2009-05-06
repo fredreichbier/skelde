@@ -320,10 +320,8 @@ int hashmap_remove(Hashmap *in, int key){
 
 /* Deallocate the hashmap */
 void hashmap_free(Hashmap *in){
-	/*Hashmap* m = (Hashmap*) in;
-	free(m->data);
-	free(m);*/
     // noop, because we use a GC
+    in = NULL;
 }
 
 /* Return the length of the hashmap */

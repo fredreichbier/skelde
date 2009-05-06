@@ -4,9 +4,10 @@
 #include "bytecode.h"
 #include "message.h"
 
+
 int main(int argc, char** argv) {
     SkVM *vm = sk_vm_new();
-    SkObject *avalanche; 
+    SkObject *avalanche;
     int i;
     
     if(argc == 1) {

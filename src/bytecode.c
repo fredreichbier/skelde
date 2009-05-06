@@ -60,7 +60,7 @@ SkObject *sk_bytecode_parse_message(SkVM *vm, FILE *stream) {
 }
 
 SkObject *sk_bytecode_parse_avalanche(SkVM *vm, FILE *stream) {
-    SkObject *previous = vm->nil, *msg;
+    SkObject *previous = vm->nil, *msg = NULL;
     for(;;) {
         unsigned char opcode;
         if(fread(&opcode, sizeof(unsigned char), 1, stream) != 1) {

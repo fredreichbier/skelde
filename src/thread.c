@@ -23,20 +23,34 @@ DEFINE_LAZY_CLONE_FUNC(sk_thread_clone);
 void *_sk_thread_task(void *self_) {
     SkObject *self = (SkObject *)self_;
     sk_vm_setup_thread(SK_VM);
-    SkObject *message = sk_message_dispatch_avalanche(sk_thread_get_message(self));
-    pthread_exit((void *)message);
+    sk_printf("start task\n");
+    sk_message_dispatch_avalanche(sk_thread_get_message(self));
+//    sk_thread_set_running(self, FALSE);
+    sk_printf("ready\n");
+    sk_vm_kill_thread(SK_VM);
+    return NULL;
 }
 
 void sk_thread_start(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
-    pthread_create(&data->thread, NULL, &_sk_thread_task, (void *)self);
+//    sk_thread_set_running(self, TRUE);
+    data->thread = 0;
+    assert(pthread_create(&data->thread, &SK_VM->tattr, &_sk_thread_task, (void *)self) == 0);
+    sk_printf("STARTED 0x%x\n", (unsigned int)data->thread);
 }
 
 SkObject *sk_thread_join(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
-    SkObject *result;
-    pthread_join(data->thread, (void **)&result);
-    return result;
+    void *eek;
+    sk_printf("fofofofofooock 0x%x\n", (unsigned int)data->thread);
+    if(data->thread/*sk_thread_get_running(self)*/) {
+        if(pthread_join(data->thread, &eek) == 0) {
+            pthread_detach(data->thread);
+            return self;
+        }
+    }
+    sk_printf("Thread is not running.\n");
+    return self;
 }
 
 SkObject *sk_thread__start(SkObject *slot, SkObject *self, SkObject *msg) {

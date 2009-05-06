@@ -10,6 +10,7 @@ typedef struct _SkVM {
     SkObject *lobby;
     SkObject *nil, *true, *false; // TODO: oh. it's rather a slot.
     pthread_key_t callstack_key, jmp_ctx_key, exc_key;
+    pthread_attr_t tattr;
 } SkVM;
 
 SkVM *sk_vm_new();
@@ -22,6 +23,7 @@ SkJumpContext *sk_vm_push_jmp_context(SkVM *vm);
 SkJumpContext *sk_vm_pop_jmp_context(SkVM *vm);
 void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code);
 void sk_vm_setup_thread(SkVM *vm);
+void sk_vm_kill_thread(SkVM *vm);
 
 #define sk_vm_callstack_pop(VM) \
     cvector_pop(sk_vm_callstack(VM))

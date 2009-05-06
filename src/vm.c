@@ -41,6 +41,8 @@ SkVM *sk_vm_new() {
     pthread_key_create(&vm->callstack_key, NULL);
     pthread_key_create(&vm->jmp_ctx_key, NULL);
     pthread_key_create(&vm->exc_key, NULL);
+    pthread_attr_init(&vm->tattr);
+    pthread_attr_setdetachstate(&vm->tattr, PTHREAD_CREATE_JOINABLE);
     vm->nil = sk_object_new(vm);
     vm->true = sk_object_new(vm);
     vm->false = sk_object_new(vm);
@@ -162,7 +164,13 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
 
 void sk_vm_setup_thread(SkVM *vm) {
     CVector *callstack;
-    cvector_create(&callstack, sizeof(SkObject *), 10);
+    cvector_create(&callstack, sizeof(SkObject *), 4);
     pthread_setspecific(vm->callstack_key, (void *)callstack);
     sk_vm_callstack_push(vm, vm->lobby);
+}
+
+void sk_vm_kill_thread(SkVM *vm) {
+    pthread_setspecific(vm->callstack_key, NULL);
+    pthread_setspecific(vm->jmp_ctx_key, NULL);
+    pthread_setspecific(vm->exc_key, NULL);
 }

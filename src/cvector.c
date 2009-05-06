@@ -118,7 +118,7 @@ int cvector_get_element(const CVectorHandle vectorhandle, void FAR * element, co
     
     if ((vectorhandle==NULL)) { return CVECTOR_BAD_ARGUMENT; }
     
-    if (index >= 0 && index < vectorhandle->size) {
+    if (index < vectorhandle->size) {
         
         MEMMOVE((char *)element,((char *)(vectorhandle->array))+index*vectorhandle->elementsize,
                 vectorhandle->elementsize);
@@ -139,7 +139,7 @@ int cvector_get_elementptr(const CVectorHandle vectorhandle, void FAR ** element
     
     if ((vectorhandle==NULL)) { return CVECTOR_BAD_ARGUMENT; }
     
-    if (index >= 0 && index < vectorhandle->size) {
+    if (index < vectorhandle->size) {
         
         *elementptr = (void FAR*)(((char *)(vectorhandle->array))+index*vectorhandle->elementsize);
         
@@ -184,7 +184,7 @@ int cvector_set_element(const CVectorHandle vectorhandle, const void FAR * eleme
     }
     
     
-    if (index >= 0 && index < vectorhandle->capacity) {
+    if (index < vectorhandle->capacity) {
         
         MEMMOVE(((char *)(vectorhandle->array))+index*vectorhandle->elementsize,(char *)element,
                 vectorhandle->elementsize);
@@ -216,7 +216,7 @@ int cvector_remove_element(const CVectorHandle vectorhandle, const size_t index)
     
     if ((vectorhandle->flags&CVECTOR_FLAGS_NO_RELOCATION)) { return CVECTOR_NO_RELOCATION; }
     
-    if (index >= vectorhandle->size || index < 0 ) { return CVECTOR_NOT_FOUND; }
+    if (index >= vectorhandle->size ) { return CVECTOR_NOT_FOUND; }
     
     if (index == vectorhandle->size-1) {
         vectorhandle->size--;

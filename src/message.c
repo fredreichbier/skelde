@@ -127,6 +127,10 @@ SkObject *sk_message_start_dispatch(SkObject *self) {
         }
         msg = sk_message_get_next(msg);
     } while(msg != self->vm->nil);
+    if(!result) {
+        /* if the result is NULL (it is after ;), use the last result. */
+        result = sk_vm_callstack_top(self->vm);
+    }
     sk_vm_callstack_pop(self->vm);
     return result;
 }

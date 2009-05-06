@@ -22,5 +22,7 @@ SkObject *sk_thread__join(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_thread_get_data(SELF) ((SkThreadData *)sk_object_get_data(SELF))
 #define sk_thread_get_message(SELF) sk_object_get_slot_recursive(SELF, "message")
+#define sk_thread_set_running(SELF, VALUE) sk_object_set_slot(SELF, "running", sk_vm_bool_to_skelde(SELF->vm, VALUE))
+#define sk_thread_get_running(SELF) sk_vm_skelde_to_bool(SELF->vm, sk_object_get_slot_recursive(SELF, "running"))
 
 #endif

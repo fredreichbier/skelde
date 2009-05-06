@@ -40,6 +40,14 @@ class Message(object):
         msg = self.next = Message(name, arguments, self)
         return msg
 
+    def print_me(self, indent=0):
+        if self.previous:
+            self.previous.print_me(indent)
+        print '    ' * indent + self.name
+        for idx, arg in enumerate(self.arguments):
+            print '    ' * indent + '[%d] =>' % idx
+            arg.print_me(indent + 1)
+
 def pack_string(s):
     return pack('%dsB' % len(s), s, 0)
 
