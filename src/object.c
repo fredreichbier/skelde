@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <dlfcn.h>
 
 #include "mem.h"
 #include "hashmap.h"
@@ -57,6 +58,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "clone", &sk_object__clone);
     sk_object_bind_method(self, "message", &sk_object__message);
     sk_object_bind_method(self, "update_slot", &sk_object__update_slot);
+    sk_object_bind_method(self, "load_shared_module", &sk_object__load_shared_module);
     return self;
 }
 
@@ -213,6 +215,27 @@ SkObject *sk_object_create_child_context(SkObject *self) {
     return ctx;
 }
 
+void sk_object_load_module(SkObject *self, const char *filename) {
+    /* open the library */
+    void *lib = dlopen(filename, RTLD_LAZY | RTLD_GLOBAL);
+    if(!lib) {
+        /* TODO: exception */
+        sk_printf("Error loading shared module: %s\n", dlerror());
+        return;
+    }
+    /* load the sk_init_module function pointer ... */
+    SkInitModuleFunction init_func = (SkInitModuleFunction)dlsym(lib, "sk_init_module");
+    if(!init_func) {
+        /* TODO: exception */
+        sk_printf("Error loading the module init function: %s\n", dlerror());
+        return;
+    }
+    /* execute it, and we're done. */
+    init_func(self);
+    /* close the library. */
+    dlclose(lib);
+}
+
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg) {
     return (self->dispatch_func)(self, self, msg);
 }
@@ -352,4 +375,11 @@ SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg) 
     } else {
         return NULL; /* Oooo-haaaa! That is DIRTY! */
     }
+}
+
+SkObject *sk_object__load_shared_module(SkObject *slot, SkObject *self, SkObject *msg) {
+    sk_message_check_argcount(msg, "Object load_shared_module", 1);
+    bstring name = sk_string_get_bstring(sk_message_eval_arg_at(msg, 0));
+    sk_object_load_module(self, (char *)name->data);
+    return self;
 }

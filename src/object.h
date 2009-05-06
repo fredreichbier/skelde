@@ -13,6 +13,7 @@ struct _SkObject;
 struct _SkVM;
 
 typedef void (*SkInitFunction)(struct _SkObject *);
+typedef void (*SkInitModuleFunction)(struct _SkObject *);
 typedef struct _SkObject *(*SkCloneFunction)(struct _SkObject *);
 typedef struct _SkObject *(*SkCallFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
 typedef struct _SkObject *(*SkDispatchFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
@@ -53,6 +54,7 @@ bstring sk_object_to_repr(SkObject *self);
 bstring sk_object_to_string(SkObject *self);
 bstring sk_object_get_tag_recursive(SkObject *self);
 SkObject *sk_object_create_child_context(SkObject *self);
+void sk_object_load_module(SkObject *self, const char *filename);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
@@ -68,6 +70,7 @@ SkObject *sk_object__equals(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__load_shared_module(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_has_slot(obj, name) \
     sk_object_get_slot(obj, name, NULL) == MAP_OK

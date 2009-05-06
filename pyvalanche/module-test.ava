@@ -1,0 +1,3 @@
+set_slot("ForeignModule", Object clone);
+ForeignModule load_shared_module("module-test/testmodule.so");
+ForeignModule from_test println;
