@@ -23,27 +23,22 @@ DEFINE_LAZY_CLONE_FUNC(sk_thread_clone);
 void *_sk_thread_task(void *self_) {
     SkObject *self = (SkObject *)self_;
     sk_vm_setup_thread(SK_VM);
-    sk_printf("start task\n");
+    sk_thread_set_running(self, TRUE);
     sk_message_dispatch_avalanche(sk_thread_get_message(self));
-//    sk_thread_set_running(self, FALSE);
-    sk_printf("ready\n");
+    sk_thread_set_running(self, FALSE);
 //    sk_vm_kill_thread(SK_VM);
     return NULL;
 }
 
 void sk_thread_start(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
-//    sk_thread_set_running(self, TRUE);
-    data->thread = 0;
     pthread_create(&data->thread, &SK_VM->tattr, &_sk_thread_task, (void *)self);
-    sk_printf("STARTED 0x%x\n", (unsigned int)data->thread);
 }
 
 SkObject *sk_thread_join(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
     void *eek;
-    sk_printf("fofofofofooock 0x%x\n", (unsigned int)data->thread);
-    if(data->thread/*sk_thread_get_running(self)*/) {
+    if(sk_thread_get_running(self)) {
         if(pthread_join(data->thread, &eek) == 0) {
             return self;
         }
