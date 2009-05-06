@@ -37,13 +37,9 @@ void sk_thread_start(SkObject *self) {
 
 SkObject *sk_thread_join(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
-    void *eek;
     if(sk_thread_get_running(self)) {
-        if(pthread_join(data->thread, &eek) == 0) {
-            return self;
-        }
+        pthread_join(data->thread, NULL);
     }
-    sk_printf("Thread is not running.\n");
     return self;
 }
 
