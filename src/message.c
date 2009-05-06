@@ -93,8 +93,9 @@ SkObject *sk_message_dispatch_simple(SkObject *self) {
     /* a message. */
     else {
         int i;
-        for(i = cvector_size(sk_vm_callstack(SK_VM)) - 1; i >= 0; i--) {
-            SkObject *object = objlist_get_at(sk_vm_callstack(SK_VM), i);
+        CVector *callstack = sk_vm_callstack(SK_VM);
+        for(i = cvector_size(callstack) - 1; i >= 0; i--) {
+            SkObject *object = objlist_get_at(callstack, i);
             result = sk_object_dispatch_message(object, self);
             if(result) {
                 return result;

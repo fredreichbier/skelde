@@ -27,7 +27,7 @@ void *_sk_thread_task(void *self_) {
     sk_message_dispatch_avalanche(sk_thread_get_message(self));
 //    sk_thread_set_running(self, FALSE);
     sk_printf("ready\n");
-    sk_vm_kill_thread(SK_VM);
+//    sk_vm_kill_thread(SK_VM);
     return NULL;
 }
 
@@ -35,7 +35,7 @@ void sk_thread_start(SkObject *self) {
     SkThreadData *data = sk_thread_get_data(self);
 //    sk_thread_set_running(self, TRUE);
     data->thread = 0;
-    assert(pthread_create(&data->thread, &SK_VM->tattr, &_sk_thread_task, (void *)self) == 0);
+    pthread_create(&data->thread, &SK_VM->tattr, &_sk_thread_task, (void *)self);
     sk_printf("STARTED 0x%x\n", (unsigned int)data->thread);
 }
 
@@ -45,7 +45,6 @@ SkObject *sk_thread_join(SkObject *self) {
     sk_printf("fofofofofooock 0x%x\n", (unsigned int)data->thread);
     if(data->thread/*sk_thread_get_running(self)*/) {
         if(pthread_join(data->thread, &eek) == 0) {
-            pthread_detach(data->thread);
             return self;
         }
     }
