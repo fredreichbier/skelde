@@ -3,29 +3,25 @@
 
 #include <assert.h>
 #include <memory.h>
+#include <stdlib.h>
 
-#define GC_PTHREADS
 #include <pthread.h>
-#include <gc/gc.h>
 
 static inline void *sk_malloc(size_t size) {
-    return GC_MALLOC(size);
+    return malloc(size);
 }
 
 static inline void *sk_realloc(void *ptr, size_t size) {
-    return GC_REALLOC(ptr, size);
+    return realloc(ptr, size);
 }
 
 static inline void *sk_calloc (size_t nelem, size_t size) {
-  void* p = sk_malloc (nelem * size);
-  assert(p != NULL);
-  memset (p, 0, nelem * size);
-  return p;
+  return calloc(nelem, size);
 }
 
 static inline void sk_free(void *ptr) {
     // that's a no-op here.
-    ptr = NULL;
+    free(ptr);
 }
 
 #endif
