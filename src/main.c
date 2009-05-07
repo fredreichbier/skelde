@@ -10,11 +10,15 @@ int main(int argc, char** argv) {
     int i;
     
     if(argc == 1) {
-        printf("skelde vm\nUsage:\tskelde FILE [FILE ...]\n");
+        printf("skelde vm\nUsage:\tskelde FILE [FILE ...]\n\n\tIf FILE is -, the bytecode is read from stdin.\n\n");
         return 1;
     }
     for(i = 1; i < argc; i++) {
-        avalanche = sk_bytecode_parse_filename(vm, argv[i]);
+        if(strcmp(argv[i], "-") == 0) {
+            avalanche = sk_bytecode_parse_stream(vm, stdin);
+        } else {
+            avalanche = sk_bytecode_parse_filename(vm, argv[i]);
+        }
         sk_vm_setup_thread(vm);
         sk_message_dispatch_avalanche(avalanche);
     }
