@@ -2,7 +2,6 @@
 #include <dlfcn.h>
 
 #include "mem.h"
-#include "hashmap.h"
 #include "skstring.h"
 #include "list.h"
 #include "object.h"
@@ -15,7 +14,7 @@
 SkObject *sk_object_new(SkVM *vm) {
     SkObject *obj = sk_malloc(sizeof(SkObject));
     obj->vm = vm;
-    obj->slots = hashmap_new();
+    obj->slots = kh_init(Slots);
     pthread_mutex_init(&obj->data_mutex, NULL);
     pthread_mutex_init(&obj->slots_mutex, NULL);
     obj->data = NULL;
@@ -62,27 +61,31 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     return self;
 }
 
-int sk_object_get_slot(SkObject *self, const char *name, SkObject **out) {
+SkObject *sk_object_get_slot(SkObject *self, const char *name) {
     pthread_mutex_lock(&self->slots_mutex);
-    int ret = hashmap_get(self->slots,
-            hashmap_hash_string(name, strlen(name)), 
-            (void**)out);
+    SkObject *obj = NULL;
+    khiter_t k = kh_get(Slots, self->slots, name);
+    if(k == kh_end(self->slots)) {
+        obj = NULL;
+    } else {
+        obj = kh_value(self->slots, k);
+    }
     pthread_mutex_unlock(&self->slots_mutex);
-    return ret;
+    return obj;
 }
 
-int sk_object_get_slot_bstring(SkObject *self, const_bstring name, SkObject **out) {
-    pthread_mutex_lock(&self->slots_mutex);
-    int ret = hashmap_get(self->slots,
-            hashmap_hash_bstring(name), 
-            (void**)out);
-    pthread_mutex_unlock(&self->slots_mutex);
-    return ret;
+SkObject *sk_object_get_slot_bstring(SkObject *self, const_bstring name) {
+    return sk_object_get_slot(self, (const char *)name->data); /* TODO: bstr2cstr? */
 }
 
 void sk_object_set_slot(SkObject *self, const char *name, SkObject *value) {
     pthread_mutex_lock(&self->slots_mutex);
-    hashmap_put(self->slots, hashmap_hash_string(name, strlen(name)), value);
+    int rv;
+    /* TODO: seems like i have to copy the key to prevent segfaults. crazy stuff. */
+    char *copied = sk_malloc((strlen(name) + 1) * sizeof(char));
+    strcpy(copied, name);
+    khiter_t k = kh_put(Slots, self->slots, copied, &rv);
+    kh_value(self->slots, k) = value;
     pthread_mutex_unlock(&self->slots_mutex);
 }
 
@@ -93,8 +96,8 @@ void sk_object_set_data(SkObject *self, void *data) {
 }
 
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
-    SkObject *slot;
-    if(sk_object_get_slot(self, name, &slot) != MAP_OK) {
+    SkObject *slot = sk_object_get_slot(self, name);
+    if(slot == NULL) {
         sk_printf("Couldn't find slot '%s'.\n", name);
         abort();
     }
@@ -102,14 +105,13 @@ SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name) {
 }
 
 SkObject *sk_object_get_slot_recursive(SkObject *self, const char *name) {
-    SkObject *slot;
-    for(;;) {
-        if(sk_object_get_slot(self, name, &slot) == MAP_OK) {
+    SkObject *slot = NULL;
+    while(self != NULL) {
+        slot = sk_object_get_slot(self, name);
+        if(slot != NULL) {
             return slot;
         }
-        if(!sk_object_has_slot(self, "proto"))
-            break;
-        self = sk_object_get_slot_lazy(self, "proto");
+        self = sk_object_get_slot(self, "proto");
     }
     return NULL;
 }
@@ -243,15 +245,14 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg) {
 SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObject *message) {
     // TODO: type checking
     bstring name = sk_string_get_bstring(sk_object_get_slot_lazy(message, "name"));
-    SkObject *slot;
-    int ret = sk_object_get_slot_bstring(self, name, (SkObject **)&slot);
-    if(ret == MAP_OK) {
+    SkObject *slot = sk_object_get_slot_bstring(self, name);
+    if(slot != NULL) {
         /* if activatable: call it. */
         if(sk_object_get_activatable(slot)) {
             slot = sk_object_call(slot, ctx, message);
         }
         return slot;
-    } else if(ret == MAP_MISSING) {
+    } else {
         // no slot. search recursively in the proto.
         if(!sk_object_has_slot(self, "proto")) {
             // we have no proto. return NULL.
@@ -260,9 +261,6 @@ SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObj
             return sk_object_dispatch_message_simple(sk_object_get_slot_lazy(self, "proto"),
                     ctx, message);
         }
-    } else {
-        // THAT WILL NEVER RETURN SOMETHING ELSE!
-        abort();
     }
 }
 

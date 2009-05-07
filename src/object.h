@@ -5,8 +5,9 @@
 #include <stdio.h>
 
 #include "mem.h"
-#include "hashmap.h"
+#include "khash.h"
 #include "stuff.h"
+#include "bstrlib.h"
 
 /* Sorry for the forward declaration! */
 struct _SkObject;
@@ -18,9 +19,11 @@ typedef struct _SkObject *(*SkCloneFunction)(struct _SkObject *);
 typedef struct _SkObject *(*SkCallFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
 typedef struct _SkObject *(*SkDispatchFunction)(struct _SkObject *, struct _SkObject *, struct _SkObject *);
 
+KHASH_MAP_INIT_STR(Slots, struct _SkObject*);
+
 typedef struct _SkObject {
     struct _SkVM *vm;
-    Hashmap *slots;
+    khash_t(Slots) *slots;
     void *data;
     pthread_mutex_t data_mutex, slots_mutex;
     /* customizable function pointers */
@@ -37,9 +40,9 @@ SkObject *sk_object_create_proto(struct _SkVM *vm);
 SkObject *sk_object_call(SkObject *self, SkObject *ctx, SkObject *message);
 _Bool sk_object_get_activatable(SkObject *self);
 void sk_object_set_data(SkObject *self, void *data);
-int sk_object_get_slot(SkObject *self, const char *slot, SkObject **out);
+SkObject *sk_object_get_slot(SkObject *self, const char *name);
 void sk_object_set_slot(SkObject *self, const char *name, SkObject *value);
-int sk_object_get_slot_bstring(SkObject *self, const_bstring name, SkObject **out);
+SkObject *sk_object_get_slot_bstring(SkObject *self, const_bstring name);
 
 SkObject *sk_object_get_slot_lazy(SkObject *self, const char *name);
 SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg);
@@ -73,7 +76,7 @@ SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__load_shared_module(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_has_slot(obj, name) \
-    sk_object_get_slot(obj, name, NULL) == MAP_OK
+    (sk_object_get_slot(obj, name) != NULL)
 
 #define sk_object_get_data(obj) \
     ((SkObject *)obj)->data
