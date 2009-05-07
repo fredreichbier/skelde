@@ -3,7 +3,6 @@
 
 #include "object.h"
 #include "cvector.h"
-#include "hashmap.h"
 #include "exc.h"
 
 typedef struct _SkVM {

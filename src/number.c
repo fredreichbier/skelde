@@ -1,7 +1,6 @@
 #include <assert.h>
 
 #include "mem.h"
-#include "hashmap.h"
 #include "vm.h"
 #include "message.h"
 #include "list.h"
