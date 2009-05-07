@@ -5,12 +5,10 @@ INCLUDES=
 CFLAGS=-Wall -Werror -g -rdynamic
 
 EXECUTABLE=skelde
-OBJECTS=src/cvector.o src/bstrlib.o \
-		src/stuff.o src/objlist.o \
+OBJECTS=src/bstrlib.o src/stuff.o \
 		src/bytecode.o src/object.o src/number.o src/list.o \
 		src/exception.o src/method.o src/call.o src/thread.o \
-		src/mutex.o \
-		src/skstring.o src/message.o src/vm.o src/main.o
+		src/mutex.o src/skstring.o src/message.o src/vm.o src/main.o
 
 all: $(EXECUTABLE)
 

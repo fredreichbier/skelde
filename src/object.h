@@ -6,6 +6,7 @@
 
 #include "mem.h"
 #include "khash.h"
+#include "kvec.h"
 #include "stuff.h"
 #include "bstrlib.h"
 
@@ -32,6 +33,8 @@ typedef struct _SkObject {
     SkCallFunction call_func;
     SkDispatchFunction dispatch_func;
 } SkObject;
+
+typedef kvec_t(SkObject *) SkObjectList;
 
 SkObject *sk_object_new(struct _SkVM *vm);
 SkObject *sk_object_clone(SkObject *self);

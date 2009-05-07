@@ -6,7 +6,7 @@
 
 typedef struct _SkThreadData {
     pthread_t thread;
-    CVector *parent_callstack;
+    SkObjectList *parent_callstack;
 } SkThreadData;
 
 void sk_thread_init(SkObject *self);

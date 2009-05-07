@@ -25,11 +25,11 @@ void sk_vm_setup_thread(SkVM *vm);
 void sk_vm_kill_thread(SkVM *vm);
 
 #define sk_vm_callstack_pop(VM) \
-    cvector_pop(sk_vm_callstack(VM))
+    kv_pop(*sk_vm_callstack(VM))
 #define sk_vm_callstack_top(VM) \
-    objlist_top(sk_vm_callstack(VM))
+    kv_top(*sk_vm_callstack(VM))
 #define sk_vm_callstack(VM) \
-    ((CVector *)pthread_getspecific((VM)->callstack_key))
+    ((SkObjectList *)pthread_getspecific((VM)->callstack_key))
 #define sk_vm_set_callstack(VM, VALUE) \
     (pthread_setspecific((VM)->callstack_key, (void *)VALUE))
 #define sk_vm_jmp_ctx(VM) \

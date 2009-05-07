@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
+#include "object.h"
 #include "mem.h"
 #include "skstring.h"
 #include "list.h"
-#include "object.h"
 #include "message.h"
 #include "vm.h"
 #include "number.h"
@@ -193,7 +193,7 @@ _Bool sk_object_to_bool(SkObject *self) {
 SkObject *sk_object_send_message_simple(SkObject *self, SkObject *msg) {
     sk_vm_callstack_push(SK_VM, self);
     SkObject *result = sk_message_dispatch_simple(msg);
-    sk_vm_callstack_pop(SK_VM);
+    sk_vm_callstack_pop(SK_VM) = NULL; /* to make the gcc happy */
     return result;
 }
 

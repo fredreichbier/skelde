@@ -1,6 +1,5 @@
 #include <assert.h>
 
-#include "cvector.h"
 #include "object.h"
 #include "list.h"
 #include "exc.h"
@@ -11,11 +10,8 @@
 SkObject *sk_list_clone(SkObject *self);
 
 void sk_list_init(SkObject *self) {
-    CVector *data;
-    cvector_create(
-            &data,
-            sizeof(SkObject *),
-            10);
+    SkObjectList *data = sk_malloc(sizeof(SkObjectList));
+    kv_init(*data);
     sk_object_set_data(self, data);
 }
 
@@ -31,27 +27,27 @@ SkObject *sk_list_create_proto(SkVM *vm) {
 }
 
 void sk_list_append(SkObject *self, SkObject *item) {
-    if(cvector_add_element(sk_object_get_data(self), &item) != 0) {
-        abort();
-    }
+    kv_push(SkObject *, *sk_list_get_data(self), item);
 }
 
 SkObject *sk_list_get_at(SkObject *self, int index) {
-    SkObject *item;
-    if(cvector_get_element(sk_list_get_data(self), &item, index) != 0) {
+    SkObjectList *list = sk_list_get_data(self);
+    if(index > kv_size(*list) - 1) {
         sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM,
                     "IndexError",
                     bformat("Couldn't access index %d.", index)));
     }
-    return item;
+    return kv_A(*list, index);
 }
 
 void sk_list_set_at(SkObject *self, int index, SkObject *value) {
-    if(cvector_set_element(sk_list_get_data(self), &value, index) != 0) {
+    SkObjectList *list = sk_list_get_data(self);
+    if(index > kv_size(*list)) {
         sk_exc_raise(SK_VM, sk_exception_create_lazy(SK_VM,
                     "IndexError",
                     bformat("Couldn't access index %d.", index)));
     }
+    kv_A(*list, index) = value;
 }
 
 SkObject *sk_list_create(SkVM *vm) {

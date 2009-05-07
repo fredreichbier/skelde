@@ -14,7 +14,7 @@ typedef enum _SkJumpCode {
 typedef struct _SkJumpContext {
     struct _SkJumpContext *next;
     jmp_buf jmp;
-    CVector *callstack;
+    SkObjectList *callstack;
 } SkJumpContext;
 
 #define sk_exc_raise(VM, EXC) \

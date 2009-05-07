@@ -4,7 +4,6 @@
 #include "object.h"
 #include "vm.h"
 #include "object.h"
-#include "objlist.h"
 #include "number.h"
 #include "list.h"
 #include "message.h"
@@ -103,7 +102,7 @@ SkObject *sk_vm_get_proto(SkVM *vm, const char *name) {
 
 void sk_vm_callstack_push(SkVM *vm, SkObject *ctx) {
     // pass the pointer to a value, that means a pointer to a pointer to a SkObject.
-    cvector_push(sk_vm_callstack(vm), &ctx); 
+    kv_push(SkObject *, *sk_vm_callstack(vm), ctx); 
 }
 
 SkObject *sk_vm_bool_to_skelde(SkVM *vm, _Bool boolean) {
@@ -129,7 +128,8 @@ SkJumpContext *sk_vm_push_jmp_context(SkVM *vm) {
         new->next = sk_vm_jmp_ctx(vm);
     }
     sk_vm_set_jmp_ctx(vm, new);
-    new->callstack = cvector_copy(sk_vm_callstack(vm));
+    new->callstack = sk_malloc(sizeof(SkObjectList));
+    kv_copy(SkObject*, *sk_vm_callstack(vm), *new->callstack);
     return new;
 }
 
@@ -163,8 +163,8 @@ void sk_vm_handle_root_exception(SkVM *vm, SkJumpCode code) {
 }
 
 void sk_vm_setup_thread(SkVM *vm) {
-    CVector *callstack;
-    cvector_create(&callstack, sizeof(SkObject *), 4);
+    SkObjectList *callstack = sk_malloc(sizeof(SkObjectList));
+    kv_init(*callstack);
     pthread_setspecific(vm->callstack_key, (void *)callstack);
     sk_vm_callstack_push(vm, vm->lobby);
 }

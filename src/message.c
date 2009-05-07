@@ -1,7 +1,6 @@
 #include <assert.h>
 
 #include "message.h"
-#include "objlist.h"
 #include "skstring.h"
 #include "number.h"
 #include "exception.h"
@@ -93,9 +92,9 @@ SkObject *sk_message_dispatch_simple(SkObject *self) {
     /* a message. */
     else {
         int i;
-        CVector *callstack = sk_vm_callstack(SK_VM);
-        for(i = cvector_size(callstack) - 1; i >= 0; i--) {
-            SkObject *object = objlist_get_at(callstack, i);
+        SkObjectList *callstack = sk_vm_callstack(SK_VM);
+        for(i = kv_size(*callstack) - 1; i >= 0; i--) {
+            SkObject *object = kv_A(*callstack, i);
             result = sk_object_dispatch_message(object, self);
             if(result) {
                 return result;
@@ -119,11 +118,11 @@ SkObject *sk_message_start_dispatch(SkObject *self) {
         if(!result) {
             /* command terminator (or unhandled message, but that's TODO),
              * pop and push the topmost element again */
-            sk_vm_callstack_pop(self->vm);
+            sk_vm_callstack_pop(self->vm) = NULL;
             sk_vm_callstack_push(self->vm, sk_vm_callstack_top(self->vm));
         } else {
             /* set topmost element to the new result. */
-            sk_vm_callstack_pop(self->vm);
+            sk_vm_callstack_pop(self->vm) = NULL;
             sk_vm_callstack_push(self->vm, result);
         }
         msg = sk_message_get_next(msg);
@@ -132,7 +131,7 @@ SkObject *sk_message_start_dispatch(SkObject *self) {
         /* if the result is NULL (it is after ;), use the last result. */
         result = sk_vm_callstack_top(self->vm);
     }
-    sk_vm_callstack_pop(self->vm);
+    sk_vm_callstack_pop(self->vm) = NULL;
     return result;
 }
 

@@ -1,7 +1,6 @@
 #include "thread.h"
 #include "message.h"
 #include "mem.h"
-#include "objlist.h"
 
 void sk_thread_init(SkObject *self) {
     sk_object_set_data(self, (void *)sk_malloc(sizeof(SkThreadData)));

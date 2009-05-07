@@ -17,8 +17,8 @@ SkObject *sk_list__append(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_list__set_at(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_list_get_data(obj) \
-    ((CVector *)sk_object_get_data(obj))
+    ((SkObjectList *)sk_object_get_data(obj))
 #define sk_list_size(obj) \
-    cvector_size(sk_list_get_data(obj))
+    kv_size(*sk_list_get_data(obj))
 
 #endif

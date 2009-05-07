@@ -65,7 +65,7 @@ SkObject *sk_method_call(SkObject *self, SkObject *parentctx, SkObject *call_msg
     }
     sk_vm_callstack_push(SK_VM, ctx);
     SkObject *result = sk_message_dispatch_avalanche(msg);
-    sk_vm_callstack_pop(SK_VM);
+    sk_vm_callstack_pop(SK_VM) = NULL; /* to make gcc happy */
     return result;
 }
 
