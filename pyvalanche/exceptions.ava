@@ -1,0 +1,21 @@
+try(
+    idontexist,
+    
+    MessageError,
+    e,
+    "Correctly handled!" println
+    e message println
+);
+try(
+    idontexist,
+    
+    SlotError,
+    e,
+    "should never be reached." println
+
+    e,
+    "Correctly caught:" println;
+    e message println
+);   
+
+

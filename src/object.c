@@ -54,6 +54,7 @@ SkObject *sk_object_create_proto(SkVM *vm) {
     sk_object_bind_method(self, "continue", &sk_object__continue);
     sk_object_bind_method(self, "==", &sk_object__equals);
     sk_object_bind_method(self, "if", &sk_object__if);
+    sk_object_bind_method(self, "try", &sk_object__try);
     sk_object_bind_method(self, "clone", &sk_object__clone);
     sk_object_bind_method(self, "message", &sk_object__message);
     sk_object_bind_method(self, "update_slot", &sk_object__update_slot);
@@ -242,6 +243,16 @@ SkObject *sk_object_dispatch_message(SkObject *self, SkObject *msg) {
     return (self->dispatch_func)(self, self, msg);
 }
 
+_Bool sk_object_is_derived_from(SkObject *self, SkObject *proto) {
+    while(sk_object_has_proto(self)) {
+        self = sk_object_get_proto(self);
+        if(self == proto) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 SkObject *sk_object_dispatch_message_simple(SkObject *self, SkObject *ctx, SkObject *message) {
     // TODO: type checking
     bstring name = sk_string_get_bstring(sk_object_get_slot_lazy(message, "name"));
@@ -285,7 +296,7 @@ SkObject *sk_object__get_slot(SkObject *_slot, SkObject *self, SkObject *msg) {
 
 SkObject *sk_object__to_bool(SkObject *slot, SkObject *self, SkObject *msg) {
     /* every object evaluates to true as a default. */
-    return SK_VM->true; 
+    return SK_VM->true;
 }
 
 SkObject *sk_object__to_repr(SkObject *slot, SkObject *self, SkObject *msg) {
@@ -304,7 +315,7 @@ SkObject *sk_object__println(SkObject *slot, SkObject *self, SkObject *msg) {
 }
 
 SkObject *sk_object__to_string(SkObject *slot, SkObject *self, SkObject *msg) {
-    return sk_object__to_repr(slot, self, msg);    
+    return sk_object__to_repr(slot, self, msg);
 }
 
 SkObject *sk_object__break(SkObject *slot, SkObject *self, SkObject *msg) {
@@ -317,12 +328,83 @@ SkObject *sk_object__continue(SkObject *slot, SkObject *self, SkObject *msg) {
     return self;
 }
 
+
+/* try(
+ *  block to try,
+ *  [exception to catch,
+ *  exception message name,
+ *  exception catching block,
+ *      [exception to catch,
+ *      exception message name,
+ *      exception catching block,
+ *      ...]
+ *  ],
+ *  [exception name,
+ *  exception catching block]
+ * )
+ */
+SkObject *sk_object__try(SkObject *slot, SkObject *self, SkObject *msg) {
+    ArgCount argcount = sk_message_argcount(msg);
+    ArgCount regular_blocks = (argcount - 1) / 3;
+    ArgCount i;
+    _Bool handled = FALSE;
+    sk_exc_try(SK_VM) {
+        sk_message_eval_arg_at(msg, 0);
+    } sk_exc_except(SK_JUMP_CODE_EXCEPTION) {
+        /* exception caught! */
+        SkObject *exc = sk_vm_exc(SK_VM);
+        for(i = 0; i < regular_blocks; i++) {
+            if(sk_object_is_derived_from(exc, sk_message_eval_arg_at(msg, i * 3 + 1))) {
+                SkObject *ctx = sk_object_create_child_context(self);
+                sk_object_set_slot(ctx,
+                        sk_string_as_charp(
+                            sk_message_get_name(
+                                sk_message_arg_at(
+                                    msg,
+                                    i * 3 + 2
+                                    )
+                                )
+                            ),
+                        exc
+                        );
+                sk_vm_callstack_push(SK_VM, ctx);
+                sk_message_eval_arg_at(msg, i * 3 + 3);
+                sk_vm_callstack_pop(SK_VM) = NULL;
+                handled = TRUE;
+                break;
+            }
+        }
+        /* no regular block matched ... */
+        if(!handled && argcount > regular_blocks * 3 + 1) {
+            SkObject *ctx = sk_object_create_child_context(self);
+            sk_object_set_slot(ctx,
+                    sk_string_as_charp(
+                        sk_message_get_name(
+                            sk_message_arg_at(
+                                msg,
+                                argcount - 2
+                                )
+                            )
+                        ),
+                    exc
+                    );
+            sk_vm_callstack_push(SK_VM, ctx);
+            sk_message_eval_arg_at(msg, argcount - 1);
+            sk_vm_callstack_pop(SK_VM) = NULL;
+            handled = TRUE;
+        }
+    } sk_exc_else {
+        sk_exc_pass(SK_VM);
+    } sk_exc_end_try(SK_VM);
+    return self;
+}
+
 /* The `if` message:
  * if(condition,
  *      block,
  *    condition,
  *      block,
- *    else_block)  
+ *    else_block)
  */
 SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
     ArgCount argcount = sk_message_argcount(msg);

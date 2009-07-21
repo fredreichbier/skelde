@@ -61,6 +61,7 @@ bstring sk_object_to_string(SkObject *self);
 bstring sk_object_get_tag_recursive(SkObject *self);
 SkObject *sk_object_create_child_context(SkObject *self);
 void sk_object_load_module(SkObject *self, const char *filename);
+_Bool sk_object_is_derived_from(SkObject *self, SkObject *proto);
 
 SkObject *sk_object__set_slot(SkObject *self, SkObject *ctx, SkObject *msg);
 SkObject *sk_object__get_slot(SkObject *self, SkObject *ctx, SkObject *msg);
@@ -77,6 +78,7 @@ SkObject *sk_object__clone(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__message(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__update_slot(SkObject *slot, SkObject *self, SkObject *msg);
 SkObject *sk_object__load_shared_module(SkObject *slot, SkObject *self, SkObject *msg);
+SkObject *sk_object__try(SkObject *slot, SkObject *self, SkObject *msg);
 
 #define sk_object_has_slot(obj, name) \
     (sk_object_get_slot(obj, name) != NULL)
@@ -106,6 +108,9 @@ SkObject *sk_object__load_shared_module(SkObject *slot, SkObject *self, SkObject
 
 #define sk_object_get_proto(obj) \
     sk_object_get_slot_lazy(obj, "proto")
+
+#define sk_object_has_proto(obj) \
+    sk_object_has_slot(obj, "proto")
 
 #define SK_VM \
     (((SkObject *)self)->vm)
