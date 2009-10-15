@@ -6,7 +6,7 @@
 #include "message.h"
 
 void sk_string_init(SkObject *self) {
-    bstring data;
+    bstring data = bfromcstr("huhu");
     sk_object_set_data(self, data);
     sk_object_set_clone_func(self, &sk_string_clone);
 }
