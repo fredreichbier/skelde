@@ -408,7 +408,7 @@ SkObject *sk_object__try(SkObject *slot, SkObject *self, SkObject *msg) {
  */
 SkObject *sk_object__if(SkObject *slot, SkObject *self, SkObject *msg) {
     ArgCount argcount = sk_message_argcount(msg);
-    ArgCount blocks = argcount % 2;
+    ArgCount blocks = argcount / 2;
     ArgCount i;
     sk_message_check_argcount(msg, "Object if", 1);
     /* if we have only one argument, return it as a bool */
