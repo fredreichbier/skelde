@@ -6,13 +6,12 @@ OP_MESSAGE = 1
 OP_EOA = 2
 
 class Message(object):
-    def __init__(self, name, arguments=None, previous=None, next=None):
+    def __init__(self, name, arguments=None, previous=None):
         self.name = name
         if arguments is None:
             arguments = []
         self.arguments = arguments
         self.previous = previous
-        self.next = next
 
     def generate_bytecode(self):
         bytecode = pack('B', OP_MESSAGE)
@@ -23,13 +22,12 @@ class Message(object):
         return bytecode
 
     def generate_avalanche(self):
-        obj = self
-        while obj.previous:
-            obj = obj.previous
+        chain = [self]
+        while chain[0].previous:
+            chain.insert(0, chain[0].previous)
         bytecode = ''
-        while obj:
+        for obj in chain:
             bytecode += obj.generate_bytecode()
-            obj = obj.next
         bytecode += pack('B', OP_EOA)
         return bytecode
 
@@ -37,7 +35,7 @@ class Message(object):
         return 'sk' + BYTECODE_VERSION + self.generate_avalanche()
 
     def __call__(self, name, arguments=None):
-        msg = self.next = Message(name, arguments, self)
+        msg = Message(name, arguments, self)
         return msg
 
     def print_me(self, indent=0):
