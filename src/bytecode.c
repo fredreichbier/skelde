@@ -23,7 +23,8 @@ SkObject *sk_bytecode_parse_stream(SkVM *vm, FILE *stream) {
      * minor bytecode version (as ordinal values)
      */
     char sig[4];
-    if(fread(sig, sizeof(char), 4, stream) != 4) {
+    if(fread(sig, sizeof(char), 4, stream) != 4) { // TODO: make that work with waiting-for-input.
+        sk_printf("Oh I can't read enough bytes. I wanted 4.\n");
         abort();
     }
     if(!(sig[0] == 's' && sig[1] == 'k' 

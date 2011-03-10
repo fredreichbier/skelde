@@ -13,6 +13,7 @@ def d_expression(t):
     ''' expression: message
                   | set_slot
                   | update_slot
+                  | paren
     '''
     return t[0]
 
@@ -62,12 +63,20 @@ def d_message_send(t, nodes):
     arguments = t[2][0] if t[2] else []
     return make_node(nodes, ast.Message, left, name, arguments)
 
+def d_paren(t):
+    ''' paren: '(' expression ')' '''
+    return t[1]
+
 def d_arguments(t):
     ''' arguments: '(' (expressions (',' (NL*) expressions (NL*))*)? ')' '''
     if t[1]:
         return [t[1][0][0]] + map(lambda x: x[2], t[1][0][1:])
     else:
         return []
+
+def d_binary_op(t):
+    ''' binary_op: expression "[+-*/~%]" expression '''
+    pass
 
 def d_identifier(t):
     ''' identifier: "[a-zA-Z_][a-zA-Z0-9_]*" '''
