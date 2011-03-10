@@ -4,10 +4,15 @@ import edleks
 from edleks.parser import parse
 from edleks.compiler import CompilingVisitor
 
-node = parse('''
-fubar := Object clone
+node = parse('''fubar := Object clone
 fubar meh := "hi"
-fubar meh println
+
+fubar hello := Method clone(
+    meh println
+    meh = "yo"
+)
+fubar hello
+fubar hello
 ''')
 
 visitor = CompilingVisitor()

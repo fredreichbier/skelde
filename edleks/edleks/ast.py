@@ -46,6 +46,13 @@ class SetSlot(Node):
         self.name = name
         self.value = value
 
+class UpdateSlot(Node):
+    def __init__(self, coord, left, name, value):
+        Node.__init__(self, coord)
+        self.left = left
+        self.name = name
+        self.value = value
+
 class Visitor(object):
     def visit(self, node):
         return self.dispatch(node)

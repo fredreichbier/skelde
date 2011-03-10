@@ -12,15 +12,16 @@ class CompilingVisitor(ast.Visitor):
     def visit_Block(self, node):
         last_sk_message = None
         # connect all messages with ';' messages
-        for message in node.messages:
+        for idx, message in enumerate(node.messages):
             sk_message = self.visit(message)
             p = sk_message
-            while True:
-                if p.previous:
-                    p = p.previous
-                else:
-                    p.previous = skelde.Message(';', None, last_sk_message)
-                    break
+            if idx > 0:
+                while True:
+                    if p.previous:
+                        p = p.previous
+                    else:
+                        p.previous = skelde.Message(';', None, last_sk_message)
+                        break
             last_sk_message = sk_message
         # return rightest message
         return last_sk_message
@@ -28,5 +29,11 @@ class CompilingVisitor(ast.Visitor):
     def visit_SetSlot(self, node):
         left = self.visit(node.left) if node.left is not None else None
         return skelde.Message('set_slot',
+                [skelde.Message('"%s"' % node.name), self.visit(node.value)],
+                left)
+
+    def visit_UpdateSlot(self, node):
+        left = self.visit(node.left) if node.left is not None else None
+        return skelde.Message('update_slot',
                 [skelde.Message('"%s"' % node.name), self.visit(node.value)],
                 left)
