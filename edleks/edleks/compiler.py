@@ -12,6 +12,9 @@ class CompilingVisitor(ast.Visitor):
     def visit_Int(self, node):
         return skelde.Message(node.value)
 
+    def visit_BinaryOp(self, node):
+        return self.visit(node.left)(node.op, [self.visit(node.right)])
+
     def visit_Block(self, node):
         last_sk_message = None
         # connect all messages with ';' messages

@@ -53,6 +53,13 @@ class UpdateSlot(Node):
         self.name = name
         self.value = value
 
+class BinaryOp(Node):
+    def __init__(self, coord, op, left, right):
+        Node.__init__(self, coord)
+        self.op = op
+        self.left = left
+        self.right = right
+
 class Visitor(object):
     def visit(self, node):
         return self.dispatch(node)
@@ -63,6 +70,6 @@ class Visitor(object):
         return meth(node, *args)
 
     def default(self, node, *args):
-        print 'No visitor for Node %s, args=%s' % (node, args)
+        print 'No visitor for %r %s, args=%s' % (node.__class__, node, args)
         return NotImplemented
 

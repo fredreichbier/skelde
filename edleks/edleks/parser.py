@@ -10,10 +10,11 @@ def d_expressions(t, nodes):
     return make_node(nodes, ast.Block, [t[1]] + map(lambda x: x[1], t[2]))
 
 def d_expression(t):
-    ''' expression: message
-                  | set_slot
+    ''' expression: set_slot
                   | update_slot
                   | paren
+                  | if
+                  | message
     '''
     return t[0]
 
@@ -21,11 +22,12 @@ def d_message(t):
     ''' message: message_send
                   | string
                   | int
+                  | binary_op
     '''
     return t[0]
 
 def d_separator(t):
-    ''' separator: "[;\n]*" '''
+    ''' separator: "[;\n]+" '''
     return t[0]
 
 def d_whitespace(t):
@@ -35,6 +37,10 @@ def d_whitespace(t):
 def d_NL(t):
     r''' NL: "[\n]*" '''
     pass
+
+def d_if(t, nodes):
+    r''' if: '%if' expression arguments '''
+    print t, nodes
 
 def d_set_slot(t, nodes):
     r''' set_slot: expression? identifier ':=' expression '''
@@ -68,18 +74,26 @@ def d_paren(t):
     return t[1]
 
 def d_arguments(t):
-    ''' arguments: '(' (expressions (',' (NL*) expressions (NL*))*)? ')' '''
+    ''' arguments: '(' (expressions (',' expressions)*)? ')' '''
     if t[1]:
-        return [t[1][0][0]] + map(lambda x: x[2], t[1][0][1:])
+        return [t[1][0][0]] + map(lambda x: x[1], t[1][0][1:])
     else:
         return []
 
-def d_binary_op(t):
-    ''' binary_op: expression "[+-*/~%]" expression '''
-    pass
+def d_binary_op(t, nodes):
+    ''' binary_op: expression bop expression '''
+    return make_node(nodes, ast.BinaryOp, t[1], t[0], t[2])
+
+def d_bop(t):
+    ''' bop: '*' $binary_op_left 2
+           | '+' $binary_op_left 1
+           | '==' $binary_op_left 1
+    '''
+    return t[0]
 
 def d_identifier(t):
-    ''' identifier: "[a-zA-Z_][a-zA-Z0-9_]*" '''
+#    r''' identifier: "[a-zA-Z_][a-zA-Z0-9_]*" ''' # kind of stupid!
+    r''' identifier: "[^0-9 ;()\":=\r\n,][^ ;()\":=\r\n,]*" ''' # kind of complicated!
     return t[0]
 
 def d_string(t, nodes):
