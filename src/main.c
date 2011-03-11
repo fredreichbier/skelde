@@ -15,12 +15,9 @@ int main(int argc, char** argv) {
     }
     for(i = 1; i < argc; i++) {
         if(strcmp(argv[i], "-") == 0) {
-            avalanche = sk_bytecode_parse_stream(vm, stdin);
-        } else if(strcmp(argv[i], "-i") == 0) {
-            // TODO: make interactive mode work (wait for fread!)
-            avalanche = sk_bytecode_parse_stream(vm, stdin);
-            i--; // HAR HAR LOOK AT ME I'M SO EVIL RUN THIS TO INFINITY // TODO: maybe do that nicer
-        } else {
+	    avalanche = sk_bytecode_parse_stream(vm, stdin);
+	    i--; // TODO: maybe do that nicer. WE ARE DOING IT FOREVAAAA.
+	} else {
             avalanche = sk_bytecode_parse_filename(vm, argv[i]);
         }
         sk_vm_setup_thread(vm);

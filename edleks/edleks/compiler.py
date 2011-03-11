@@ -9,6 +9,9 @@ class CompilingVisitor(ast.Visitor):
     def visit_String(self, node):
         return skelde.Message('"%s"' % node.value.encode('string-escape'))
 
+    def visit_Int(self, node):
+        return skelde.Message(node.value)
+
     def visit_Block(self, node):
         last_sk_message = None
         # connect all messages with ';' messages

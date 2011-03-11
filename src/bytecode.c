@@ -23,11 +23,18 @@ SkObject *sk_bytecode_parse_stream(SkVM *vm, FILE *stream) {
      * minor bytecode version (as ordinal values)
      */
     char sig[4];
-    if(fread(sig, sizeof(char), 4, stream) != 4) { // TODO: make that work with waiting-for-input.
-        sk_printf("Oh I can't read enough bytes. I wanted 4.\n");
-        abort();
+    size_t bytes_read;
+    if((bytes_read = fread(sig, sizeof(char), 4, stream)) != 4) {
+        if(stream == stdin) {
+            // expected end of input.
+            exit(0);
+        } else {
+            // non-stdin input? errorz!
+            sk_printf("Oh I can't read enough bytes. I wanted 4, got %d.\n", bytes_read);
+            abort();
+        }
     }
-    if(!(sig[0] == 's' && sig[1] == 'k' 
+    if(!(sig[0] == 's' && sig[1] == 'k'
                 && sig[2] == SK_BYTECODE_VERSION_MAJOR 
                 && sig[3] == SK_BYTECODE_VERSION_MINOR)) {
         sk_printf("The given bytecode signature is not supported.\n");
