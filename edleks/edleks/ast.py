@@ -60,6 +60,11 @@ class BinaryOp(Node):
         self.left = left
         self.right = right
 
+class Arrow(Node):
+    def __init__(self, coord, elems):
+        Node.__init__(self, coord)
+        self.elems = elems
+
 class Visitor(object):
     def visit(self, node):
         return self.dispatch(node)

@@ -13,7 +13,7 @@ def d_expression(t):
     ''' expression: set_slot
                   | update_slot
                   | paren
-                  | if
+                  | arrow
                   | message
     '''
     return t[0]
@@ -38,9 +38,9 @@ def d_NL(t):
     r''' NL: "[\n]*" '''
     pass
 
-def d_if(t, nodes):
-    r''' if: '%if' expression arguments '''
-    print t, nodes
+def d_arrow(t, nodes):
+    r''' arrow: '{' arguments_really '->' (NL*) arguments_really '}' '''
+    return make_node(nodes, ast.Arrow, t[1] + t[4])
 
 def d_set_slot(t, nodes):
     r''' set_slot: expression? identifier ':=' expression '''
@@ -70,15 +70,21 @@ def d_message_send(t, nodes):
     return make_node(nodes, ast.Message, left, name, arguments)
 
 def d_paren(t):
-    ''' paren: '(' expression ')' '''
+    ''' paren: '(' expressions ')'
+             | '(' expression ')'
+    '''
     return t[1]
 
 def d_arguments(t):
-    ''' arguments: '(' (expressions (',' expressions)*)? ')' '''
+    ''' arguments: '(' arguments_really? ')' '''
     if t[1]:
-        return [t[1][0][0]] + map(lambda x: x[1], t[1][0][1:])
+        return t[1][0]
     else:
         return []
+
+def d_arguments_really(t):
+    ''' arguments_really: expressions (',' expressions)* '''
+    return [t[0]] + map(lambda x: x[1], t[1])
 
 def d_binary_op(t, nodes):
     ''' binary_op: expression bop expression '''
@@ -93,7 +99,7 @@ def d_bop(t):
 
 def d_identifier(t):
 #    r''' identifier: "[a-zA-Z_][a-zA-Z0-9_]*" ''' # kind of stupid!
-    r''' identifier: "[^0-9 ;()\":=\r\n,][^ ;()\":=\r\n,]*" ''' # kind of complicated!
+    r''' identifier: "[^0-9 ;()\":=\r{}\n,][^ ;()\":=\r\n{},]*" ''' # kind of complicated!
     return t[0]
 
 def d_string(t, nodes):
@@ -106,4 +112,4 @@ def d_int(t, nodes): # TODO: float
 
 def parse(s):
     parser = Parser()
-    return parser.parse(s).getStructure()
+    return parser.parse(s, print_debug_info=0).getStructure()

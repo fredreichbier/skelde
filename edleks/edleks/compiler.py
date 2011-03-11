@@ -1,9 +1,20 @@
 from . import ast, skelde
 
+def flatten(l):
+    for e in l:
+        if isinstance(e, (list, tuple)):
+            for ee in e:
+                yield ee
+        else:
+            yield e
+
+def flattenl(l):
+    return list(flatten(l))
+
 class CompilingVisitor(ast.Visitor):
     def visit_Message(self, node):
         previous = self.visit(node.left) if node.left else None
-        arguments = map(self.visit, node.arguments)
+        arguments = flattenl(map(self.visit, node.arguments))
         return skelde.Message(node.name, arguments, previous)
 
     def visit_String(self, node):
@@ -13,7 +24,10 @@ class CompilingVisitor(ast.Visitor):
         return skelde.Message(node.value)
 
     def visit_BinaryOp(self, node):
-        return self.visit(node.left)(node.op, [self.visit(node.right)])
+        return self.visit(node.left)(node.op, flattenl([self.visit(node.right)]))
+
+    def visit_Arrow(self, node):
+        return map(self.visit, node.elems)
 
     def visit_Block(self, node):
         last_sk_message = None
@@ -35,11 +49,11 @@ class CompilingVisitor(ast.Visitor):
     def visit_SetSlot(self, node):
         left = self.visit(node.left) if node.left is not None else None
         return skelde.Message('set_slot',
-                [skelde.Message('"%s"' % node.name), self.visit(node.value)],
+                flattenl([skelde.Message('"%s"' % node.name), self.visit(node.value)]),
                 left)
 
     def visit_UpdateSlot(self, node):
         left = self.visit(node.left) if node.left is not None else None
         return skelde.Message('update_slot',
-                [skelde.Message('"%s"' % node.name), self.visit(node.value)],
+                flattenl([skelde.Message('"%s"' % node.name), self.visit(node.value)]),
                 left)

@@ -1,0 +1,16 @@
+test := Method clone({number ->
+    if({number == 123 ->
+            "One two three hihihihi" println},
+       {number == 456 ->
+            "Four five six ixixixix" println},
+       "Dunno." println  
+    )
+})
+
+moo := Method clone({a, b -> a + b})
+
+test(moo(122, 1))
+test(228 + 228)
+test(1)
+
+
