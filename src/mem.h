@@ -5,7 +5,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
-#include <gc.h>
+#include <gc/gc.h>
 void * GC_dlopen(const char *path, int mode);
 
 #define GC_PTHREADS
