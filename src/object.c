@@ -133,9 +133,9 @@ void sk_object_bind_method(SkObject *self, char *name, SkCallFunction func) {
 }
 
 bstring sk_object_to_repr_simple(SkObject *self) {
-    return bformat("<%s at 0x%x>",
+    return bformat("<%s at %p>",
             sk_object_get_tag_recursive(self)->data,
-            (unsigned int)self);
+            self);
 }
 
 bstring sk_object_get_tag_recursive(SkObject *self) {

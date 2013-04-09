@@ -1,6 +1,6 @@
 CC=gcc
 MAKE=make
-LIBS=-pthread -dl -lgc
+LIBS=-pthread -ldl -lgc
 INCLUDES=
 CFLAGS=-Wall -Werror -g -rdynamic
 
