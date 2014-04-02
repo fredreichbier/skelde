@@ -23,6 +23,6 @@ int main(int argc, char** argv) {
         sk_vm_setup_thread(vm);
         sk_message_dispatch_avalanche(avalanche);
     }
-
-    pthread_exit(NULL);
+//    pthread_exit(NULL);
+    return 0;
 }
